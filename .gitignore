@@ -1,0 +1,7 @@
+node_modules
+dist
+*.local
+.DS_Store
+# dependencias que instala el script de medición de design-dna
+.agents/skills/*/scripts/node_modules
+.agents/skills/*/scripts/package-lock.json

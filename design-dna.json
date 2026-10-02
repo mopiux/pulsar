@@ -1,0 +1,572 @@
+{
+  "meta": {
+    "name": "Pulsa - Armado por capas",
+    "description": "ADN visual extraído de tres referencias: el armador de hamburguesas capa por capa (ref-1), su portada con galería y votos (ref-2) y una pila editorial de objetos 3D flotantes (ref-3). Superficie clara con rombos, barra ciruela, cintas turquesa con subrayado mostaza a rojo, mesa de madera bajo el producto y un bloque ciruela para la comunidad.",
+    "source_references": [
+      "referencias/ref-1.png - armador capa por capa: barra ciruela, fondo claro con rombos, pieza flotando arriba, carrusel horizontal de ingredientes con + y -, producto sobre tabla de madera, CTA en cinta turquesa con subrayado degradé",
+      "referencias/ref-2.png - portada dividida: mitad clara 'CREATE' y mitad ciruela 'VOTE', mosaico de tres pósters con pestañas de color (Latest mostaza, Trending turquesa, Most popular rojo), autor en cursiva",
+      "referencias/ref-3.png - pila de libros 3D flotando separados verticalmente sobre fondo casi negro cálido, leve inclinación, sombra suave, índice vertical de marcas a la izquierda"
+    ],
+    "created_at": "2026-10-02"
+  },
+  "design_system": {
+    "color": {
+      "palette_type": "split-complementary",
+      "primary": {
+        "hex": "#441e33",
+        "role": "Ciruela de marca, medido como color de texto en ref-1: barra de navegación, títulos y texto de interfaz sobre claro"
+      },
+      "secondary": {
+        "hex": "#07a7a4",
+        "role": "Turquesa de acción: cintas CTA (en su sombra #067f7c cuando lleva texto blanco, para contraste AA), el + del carrusel, título display de la galería, pestaña Tendencia"
+      },
+      "accent": {
+        "hex": "#d6a020",
+        "role": "Mostaza de énfasis: insignia del logo, etiqueta de precio, subrayado degradé de los CTA (mostaza a rojo #db2224), pestaña Recientes"
+      },
+      "neutral": {
+        "scale": [
+          "#f6f6f5",
+          "#f1f1f1",
+          "#ebecec",
+          "#ced3c7",
+          "#929093",
+          "#69696a",
+          "#373038",
+          "#1d1817",
+          "#441e33"
+        ],
+        "usage": "#f6f6f5 es la superficie dominante del configurador. El texto medido en ref-1 es ciruela #441e33 (no un gris), así que el texto de cuerpo y los títulos van en ciruela; los grises #929093 y #69696a quedan para leyendas secundarias y los rombos del fondo. #1d1817 es el casi negro cálido de la pila flotante de ref-3, usado solo en un póster y en sombras."
+      },
+      "semantic": {
+        "success": "#07a7a4",
+        "warning": "#d6a020",
+        "error": "#db2224",
+        "info": "#410b29"
+      },
+      "surface": {
+        "background": "#f6f6f5",
+        "card": "#ffffff",
+        "elevated": "#410b29"
+      },
+      "contrast_strategy": "Ciruela sobre claro en el configurador (#441e33 sobre #f6f6f5, 13,8:1); claro sobre ciruela profundo (#f1f1f1 sobre #410b29) en la galería. Un solo cambio de bloque de color deliberado, como en ref-2.",
+      "measurement": {
+        "k": 8,
+        "sampling": {
+          "method": "deterministic_stratified",
+          "max_pixels": 160000,
+          "sampled_pixels": 160000
+        },
+        "preprocessing": "Las capturas traen un marco oscuro (#222221) que no es parte del diseño: se recortó antes de medir (ref-1 40,19 677x677; ref-2 32,32 677x369; ref-3 6,6 973x614)."
+      },
+      "measured_palette": [
+        {
+          "hex": "#f6f6f5",
+          "coverage": 0.6022,
+          "role": "background",
+          "source": "ref-1"
+        },
+        {
+          "hex": "#e1ceab",
+          "coverage": 0.1554,
+          "role": "unassigned",
+          "source": "ref-1"
+        },
+        {
+          "hex": "#b09672",
+          "coverage": 0.0974,
+          "role": "unassigned",
+          "source": "ref-1"
+        },
+        {
+          "hex": "#441e33",
+          "coverage": 0.0541,
+          "role": "text",
+          "source": "ref-1"
+        },
+        {
+          "hex": "#d6a020",
+          "coverage": 0.035,
+          "role": "accent",
+          "source": "ref-1"
+        },
+        {
+          "hex": "#7f691f",
+          "coverage": 0.0293,
+          "role": "unassigned",
+          "source": "ref-1"
+        },
+        {
+          "hex": "#07a7a4",
+          "coverage": 0.0164,
+          "role": "unassigned",
+          "source": "ref-1"
+        },
+        {
+          "hex": "#c03d1b",
+          "coverage": 0.0102,
+          "role": "unassigned",
+          "source": "ref-1"
+        },
+        {
+          "hex": "#f1f1f1",
+          "coverage": 0.3065,
+          "role": "background",
+          "source": "ref-2"
+        },
+        {
+          "hex": "#410b29",
+          "coverage": 0.2942,
+          "role": "text",
+          "source": "ref-2"
+        },
+        {
+          "hex": "#e3c8a5",
+          "coverage": 0.1082,
+          "role": "unassigned",
+          "source": "ref-2"
+        },
+        {
+          "hex": "#db2224",
+          "coverage": 0.0652,
+          "role": "accent",
+          "source": "ref-2"
+        },
+        {
+          "hex": "#ad8e75",
+          "coverage": 0.0651,
+          "role": "unassigned",
+          "source": "ref-2"
+        },
+        {
+          "hex": "#0ea8a6",
+          "coverage": 0.0596,
+          "role": "unassigned",
+          "source": "ref-2"
+        },
+        {
+          "hex": "#794f27",
+          "coverage": 0.0554,
+          "role": "unassigned",
+          "source": "ref-2"
+        },
+        {
+          "hex": "#e3a329",
+          "coverage": 0.0459,
+          "role": "unassigned",
+          "source": "ref-2"
+        },
+        {
+          "hex": "#1d1817",
+          "coverage": 0.6826,
+          "role": "background",
+          "source": "ref-3"
+        },
+        {
+          "hex": "#69696a",
+          "coverage": 0.125,
+          "role": "unassigned",
+          "source": "ref-3"
+        },
+        {
+          "hex": "#ebecec",
+          "coverage": 0.057,
+          "role": "text",
+          "source": "ref-3"
+        },
+        {
+          "hex": "#373038",
+          "coverage": 0.0494,
+          "role": "unassigned",
+          "source": "ref-3"
+        },
+        {
+          "hex": "#ced3c7",
+          "coverage": 0.0387,
+          "role": "unassigned",
+          "source": "ref-3"
+        },
+        {
+          "hex": "#929093",
+          "coverage": 0.0318,
+          "role": "unassigned",
+          "source": "ref-3"
+        },
+        {
+          "hex": "#b6080e",
+          "coverage": 0.0109,
+          "role": "accent",
+          "source": "ref-3"
+        },
+        {
+          "hex": "#17cdf3",
+          "coverage": 0.0046,
+          "role": "unassigned",
+          "source": "ref-3"
+        }
+      ]
+    },
+    "typography": {
+      "type_scale": {
+        "display": {
+          "size": "clamp(3rem, 7vw, 5.5rem)",
+          "weight": "400 (Bungee Inline es de un solo peso)",
+          "line_height": "0.95",
+          "tracking": "0.01em"
+        },
+        "heading_1": {
+          "size": "clamp(1.75rem, 3vw, 2.5rem)",
+          "weight": "700",
+          "line_height": "1.05",
+          "tracking": "0"
+        },
+        "heading_2": {
+          "size": "1.5rem",
+          "weight": "700",
+          "line_height": "1.1",
+          "tracking": "0.01em"
+        },
+        "heading_3": {
+          "size": "1.125rem",
+          "weight": "600",
+          "line_height": "1.2",
+          "tracking": "0.02em"
+        },
+        "body": {
+          "size": "1rem",
+          "weight": "400",
+          "line_height": "1.55",
+          "tracking": "0"
+        },
+        "body_small": {
+          "size": "0.875rem",
+          "weight": "400",
+          "line_height": "1.5",
+          "tracking": "0"
+        },
+        "caption": {
+          "size": "0.8125rem",
+          "weight": "500",
+          "line_height": "1.3",
+          "tracking": "0.01em"
+        },
+        "overline": {
+          "size": "0.75rem",
+          "weight": "700",
+          "line_height": "1",
+          "tracking": "0.12em"
+        }
+      },
+      "font_families": {
+        "heading": "\"Barlow Condensed\", ui-sans-serif, system-ui, sans-serif",
+        "body": "\"Barlow\", ui-sans-serif, system-ui, sans-serif",
+        "mono": "ui-monospace, \"SF Mono\", Menlo, monospace (solo tabular-nums en precios, sin etiquetas mono)"
+      },
+      "font_style_notes": "Grotesca condensada de aire DIN para navegación, instrucciones y nombres de ingredientes (ref-1). Títulos display gruesos y geométricos con una línea interior clara, rellenos en turquesa ('CREATE', 'VOTE'), reproducidos con Bungee Inline. Autor de cada póster en itálica pequeña del mismo cuerpo. Navegación en mayúsculas condensadas."
+    },
+    "spacing": {
+      "base_unit": "4px",
+      "scale": [
+        "4px",
+        "8px",
+        "12px",
+        "16px",
+        "24px",
+        "32px",
+        "48px",
+        "64px",
+        "96px"
+      ],
+      "content_density": "comfortable",
+      "section_rhythm": "Dos grandes bloques a viewport completo (configurador claro, galería ciruela) unidos por un borde duro; dentro de cada uno, bandas horizontales de ancho completo (instrucción, carrusel, mesa) separadas por 16-32px."
+    },
+    "layout": {
+      "grid_system": "Escenario central a ancho completo con bandas horizontales; galería en mosaico de 3 columnas de pósters verticales",
+      "max_content_width": "1280px",
+      "columns": "1 en el configurador (centrado sobre el producto), 3 en la galería escritorio, 2 en tableta, 1 en mobile",
+      "gutter": "2px entre pósters (los pósters de ref-2 están pegados), 24px de margen lateral",
+      "breakpoints": [
+        "640px",
+        "768px",
+        "1024px",
+        "1280px"
+      ],
+      "alignment_tendency": "centered"
+    },
+    "shape": {
+      "border_radius": {
+        "small": "0px",
+        "medium": "2px",
+        "large": "4px",
+        "pill": "9999px (solo para la insignia circular del logo y las muestras de color)"
+      },
+      "border_usage": "subtle 1px en la banda del carrusel; nada de bordes en pósters",
+      "divider_style": "Bandas de color de ancho completo en lugar de líneas; el carrusel es una franja blanca con sombra superior e inferior."
+    },
+    "elevation": {
+      "shadow_style": "soft diffused",
+      "levels": {
+        "low": "0 1px 2px rgba(68, 29, 53, 0.08)",
+        "medium": "0 8px 24px -8px rgba(68, 29, 53, 0.18)",
+        "high": "0 24px 48px -16px rgba(46, 22, 37, 0.35)"
+      },
+      "depth_cues": "overlapping layers, sombra de contacto bajo el producto, piezas flotando a distinta altura"
+    },
+    "iconography": {
+      "style": "glifos llenos y simples, más señal que ilustración (+, -, flechas, lupa)",
+      "stroke_weight": "bold",
+      "size_scale": [
+        "16px",
+        "20px",
+        "24px",
+        "32px"
+      ],
+      "preferred_set": "@phosphor-icons/react en peso bold"
+    },
+    "motion": {
+      "easing": "cubic-bezier(0.34, 1.56, 0.64, 1) para encastres con rebote; cubic-bezier(0.16, 1, 0.3, 1) para viajes de cámara y entradas",
+      "duration_scale": {
+        "micro": "140ms",
+        "normal": "320ms",
+        "macro": "900ms"
+      },
+      "entrance_pattern": "las piezas caen desde arriba y rebotan al apoyarse sobre la anterior",
+      "exit_pattern": "la pieza se eleva y queda flotando con balanceo leve",
+      "philosophy": "playful bouncy"
+    },
+    "components": {
+      "button_style": "CTA en cinta turquesa (#067f7c, sombra de #07a7a4 para texto blanco AA) con extremos cortados en diagonal, texto en mayúsculas condensadas y una franja inferior desplazada con degradé mostaza a rojo",
+      "input_style": "campo blanco de esquinas vivas con borde gris 1px, etiqueta condensada arriba; selector desplegable como el 'Other' de ref-1 con icono de menú a la izquierda y flecha a la derecha",
+      "card_style": "póster vertical a sangre con fondo de color pleno, título en mayúsculas gruesas centrado, autor en itálica, producto abajo; sin radio ni borde",
+      "navigation_pattern": "barra ciruela de 56px, enlaces en mayúsculas condensadas a ambos lados de una insignia circular mostaza que cuelga por debajo de la barra",
+      "modal_style": "hoja blanca de esquinas vivas con encabezado ciruela, sobre velo ciruela translúcido",
+      "list_style": "carrusel horizontal de ingredientes con nombre debajo y elemento central destacado; resumen como lista en dos columnas",
+      "component_notes": "Pestañas de categoría tipo etiqueta de color pleno pegadas al borde superior del póster (mostaza, turquesa, rojo). El '+' turquesa va arriba del carrusel y el '-' rojo abajo."
+    }
+  },
+  "design_style": {
+    "aesthetic": {
+      "mood": [
+        "apetitoso",
+        "lúdico",
+        "artesanal",
+        "confiado"
+      ],
+      "visual_metaphor": "armar algo propio apilando capas sobre una mesa de trabajo",
+      "era_influence": "retail digital de campaña de los 2010s con producto fotográfico y tipografía de cartel",
+      "genre": "configurador de producto de consumo con galería comunitaria",
+      "personality_traits": [
+        "generoso",
+        "directo",
+        "juguetón",
+        "prolijo"
+      ],
+      "adjectives": [
+        "táctil",
+        "cálido",
+        "colorido",
+        "ordenado"
+      ]
+    },
+    "visual_language": {
+      "complexity": "moderate",
+      "ornamentation": "subtle accents",
+      "whitespace_usage": "aire alrededor del producto, bandas compactas para controles",
+      "visual_weight_distribution": "el producto pesa en el centro; color fuerte solo en la barra, las cintas y el bloque de galería",
+      "focal_strategy": "single hero element",
+      "contrast_level": "alto entre bloques, medio dentro del configurador",
+      "texture_usage": "rombos grises muy suaves en el fondo claro, veta de madera bajo el producto, tela gris en el pie"
+    },
+    "composition": {
+      "hierarchy_method": "scale contrast",
+      "balance_type": "symmetric",
+      "flow_direction": "de arriba hacia abajo: instrucción, pieza flotante, carrusel, pila armada, CTA",
+      "grouping_strategy": "bandas horizontales de ancho completo",
+      "negative_space_role": "aísla al producto como protagonista"
+    },
+    "imagery": {
+      "photo_treatment": "producto recortado con iluminación de estudio y sombra de contacto, color saturado y apetitoso",
+      "illustration_style": "ninguna ilustración; solo producto y tipografía",
+      "graphic_elements": "cintas con extremos cortados, insignia circular, pestañas de color",
+      "pattern_usage": "patrón de rombos (arlequín) en grises casi blancos",
+      "image_shape": "recorte libre del producto, pósters rectangulares a sangre"
+    },
+    "interaction_feel": {
+      "feedback_style": "físico: cada elección se ve aplicada en el producto al instante",
+      "hover_behavior": "la cinta se desplaza 1-2px y su franja inferior se corre; los pósters acercan el producto",
+      "transition_personality": "bouncy elastic",
+      "loading_style": "silueta del producto en gris mientras carga",
+      "microinteraction_density": "medium"
+    },
+    "brand_voice_in_ui": {
+      "tone": "cercano y entusiasta, instrucciones cortas en segunda persona",
+      "formality": "informal (voseo rioplatense)",
+      "cta_style": "direct imperative",
+      "empty_state_approach": "invita a la acción concreta que llena el vacío",
+      "error_tone": "simple y amable, dice qué hacer"
+    }
+  },
+  "visual_effects": {
+    "overview": {
+      "effect_intensity": "moderate",
+      "performance_tier": "heavy",
+      "fallback_strategy": "con prefers-reduced-motion se apagan la rotación automática, el balanceo y los viajes largos de cámara; las piezas se reubican sin rebote",
+      "primary_technology": "WebGL/Three.js (React Three Fiber)"
+    },
+    "background_effects": {
+      "type": "pattern-fill",
+      "description": "Patrón de rombos estático en grises casi blancos detrás del producto, con algunos rombos rellenos un tono más oscuro",
+      "technology": "SVG pattern",
+      "params": {
+        "color_palette": [
+          "#f5f5f5",
+          "#ececec",
+          "#e6e6e6"
+        ],
+        "speed": "estático",
+        "density": "rombos de 120px",
+        "opacity": "1",
+        "blend_mode": "normal"
+      }
+    },
+    "particle_systems": {
+      "enabled": false,
+      "type": "none",
+      "description": "Las referencias no muestran partículas",
+      "technology": "none",
+      "params": {
+        "count": "0",
+        "shape": "none",
+        "size_range": "none",
+        "movement_pattern": "none",
+        "color_behavior": "none",
+        "interaction": "none",
+        "spawn_area": "none"
+      }
+    },
+    "3d_elements": {
+      "enabled": true,
+      "type": "product-viewer",
+      "description": "Producto despiezado en capas que flotan separadas verticalmente con balanceo leve (ref-3) y se apilan de abajo hacia arriba sobre una mesa de madera (ref-1)",
+      "technology": "Three.js vía @react-three/fiber + drei",
+      "params": {
+        "renderer": "WebGL2, antialias, tone mapping ACES, fondo transparente sobre el patrón CSS",
+        "lighting": "Environment de estudio + luz direccional cálida desde arriba a la izquierda + spot que marca la capa activa",
+        "camera": "perspectiva 35mm, tres cuartos desde arriba, viaja según la capa activa",
+        "materials": "aluminio anodizado (metalness alto, rugosidad media), PBT mate, resina y policarbonato translúcidos con transmisión, madera mate",
+        "geometry": "cajas redondeadas biseladas, teclas esculpidas por fila, tubo helicoidal para el cable",
+        "post_processing": [
+          "bloom (solo en la retroiluminación)"
+        ],
+        "interaction_model": "arrastrar para rotar, rueda para zoom con límites, inclinación que sigue al mouse, autorrotación lenta en reposo"
+      }
+    },
+    "shader_effects": {
+      "enabled": false,
+      "type": "none",
+      "description": "Sin shaders propios; los materiales físicos estándar alcanzan",
+      "technology": "none",
+      "params": {
+        "uniforms": "none",
+        "vertex_manipulation": "none",
+        "fragment_output": "none",
+        "noise_type": "none",
+        "distortion": "none"
+      }
+    },
+    "scroll_effects": {
+      "parallax": {
+        "enabled": false,
+        "layers": "0",
+        "depth_range": "none",
+        "speed_curve": "none"
+      },
+      "scroll_triggered_animations": {
+        "enabled": true,
+        "trigger_points": [
+          "entrada de la galería al viewport"
+        ],
+        "animation_type": "fade-up",
+        "scrub_behavior": "triggered"
+      },
+      "scroll_morphing": {
+        "enabled": false,
+        "description": "No presente en las referencias"
+      }
+    },
+    "text_effects": {
+      "type": "split-letter-animate",
+      "description": "El título de cada paso entra palabra por palabra al cambiar de capa",
+      "technology": "Motion",
+      "params": {
+        "split_strategy": "by-word",
+        "animation_per_unit": "sube 12px y aparece",
+        "stagger": "50ms",
+        "effect_style": "slide"
+      }
+    },
+    "cursor_effects": {
+      "enabled": false,
+      "type": "none",
+      "description": "Cursor nativo; solo el producto 3D reacciona al puntero con inclinación",
+      "params": {
+        "shape": "none",
+        "size": "none",
+        "blend_mode": "none",
+        "trail": "none",
+        "interaction_zone": "none"
+      }
+    },
+    "image_effects": {
+      "type": "parallax-tilt",
+      "description": "En los pósters de la galería el producto se acerca y se inclina levemente al pasar el mouse",
+      "technology": "CSS transform + Motion",
+      "params": {
+        "filter_pipeline": "none",
+        "hover_transform": "scale(1.04) translateY(-4px)",
+        "reveal_animation": "fade-up al entrar",
+        "distortion_type": "none"
+      }
+    },
+    "glassmorphism_neumorphism": {
+      "enabled": false,
+      "style": "none",
+      "params": {
+        "blur_radius": "0",
+        "transparency": "0",
+        "border_treatment": "none",
+        "shadow_type": "none",
+        "light_source_angle": "none"
+      }
+    },
+    "canvas_drawings": {
+      "enabled": true,
+      "type": "pattern-fill",
+      "description": "Textura de veta de madera generada en canvas 2D para la mesa bajo el producto",
+      "technology": "Canvas 2D a CanvasTexture",
+      "params": {
+        "draw_method": "franjas con ruido senoidal y nudos",
+        "animation_loop": "ninguno (se dibuja una vez)",
+        "color_scheme": [
+          "#e1ceab",
+          "#b09672",
+          "#794f27"
+        ],
+        "responsiveness": "textura fija repetida",
+        "interaction": "none"
+      }
+    },
+    "svg_animations": {
+      "enabled": false,
+      "type": "none",
+      "description": "No presente en las referencias",
+      "params": {
+        "animation_method": "none",
+        "path_morphing": "none",
+        "stroke_animation": "none",
+        "filter_effects": "none"
+      }
+    },
+    "composite_notes": "El fondo claro con rombos es CSS/SVG y el lienzo WebGL es transparente encima, así el producto parece apoyado en la página como en ref-1. La pila flotante y el balanceo vienen de ref-3, pero sobre fondo claro: el casi negro de ref-3 queda solo como tono de sombra y de texto fuerte. La galería toma el bloque ciruela de ref-2 como único cambio de color de la página. El cian #17cdf3 de ref-3 (0,46% de cobertura) se descarta a propósito para no caer en fondo oscuro con acento cian. Verificación: las capturas del configurador y de la galería se miden por separado contra ref-1 y ref-2 respectivamente; ref-3 aporta composición (pila flotante), no paleta de interfaz. Resultado de verify.mjs (k=8): configurador contra ref-1 recortada, ΔE medio 2,97 y deriva de cobertura 0,17 (dentro de umbral); galería contra la mitad VOTE de ref-2, ΔE medio 3,15 y deriva 0,29 (dentro de umbral). En ambos el ΔE máximo supera 20 solo por colores propios de la foto de hamburguesa (tomate #c03d1b, lechuga #7f691f y #58980e, cada uno 1-3% de cobertura) que no tienen equivalente en un teclado y se dejan fuera a propósito."
+  }
+}
