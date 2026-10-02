@@ -77,7 +77,10 @@ export const LAYER_COUNT = STEPS.length
  */
 export type Phase = "building" | "spinning" | "complete"
 
+export type View = "configurador" | "galeria"
+
 interface ConfiguratorState {
+  view: View
   config: Config
   /** cantidad de capas encastradas, siempre un prefijo desde la carcasa */
   placed: number
@@ -97,11 +100,16 @@ interface ConfiguratorState {
   setPlaced: (placed: number) => void
   toggleSound: () => void
   triggerDemoPress: () => void
+  setView: (view: View) => void
 }
 
 export const activeStepIndex = (placed: number) => Math.min(placed, LAYER_COUNT - 1)
 
+const initialView = (): View =>
+  typeof window !== "undefined" && window.location.hash === "#galeria" ? "galeria" : "configurador"
+
 export const useConfigurator = create<ConfiguratorState>((set, get) => ({
+  view: initialView(),
   config: DEFAULT_CONFIG,
   placed: 0,
   phase: "building",
@@ -152,4 +160,13 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
   toggleSound: () => set((state) => ({ soundOn: !state.soundOn })),
 
   triggerDemoPress: () => set((state) => ({ demoPress: state.demoPress + 1 })),
+
+  setView: (view) => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href)
+      url.hash = view
+      window.history.replaceState(null, "", url)
+    }
+    set({ view })
+  },
 }))

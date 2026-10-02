@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils"
 
 /*
   Adaptado de Motion Primitives (TextEffect, preset "slide", por palabra).
-  Cambios para el Design DNA: entrada corta hacia arriba con resorte de
-  encastre, sin blur, y con prefers-reduced-motion se muestra estático.
+  Cambios para el Design DNA: entrada corta hacia arriba con un resorte
+  suave, sin blur, y con prefers-reduced-motion se muestra estático.
 */
 
 const container: Variants = {

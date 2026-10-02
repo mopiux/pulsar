@@ -4,20 +4,21 @@ import { Toggle as TogglePrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
+// Segmentos de un control en píldora: el activo sube a la superficie.
 const toggleVariants = cva(
-  "inline-flex items-center justify-center gap-2 font-display font-semibold tracking-wide uppercase whitespace-nowrap transition-[color,background-color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex items-center justify-center gap-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-[color,background-color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/45 disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
-          "bg-transparent text-muted-foreground hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-[inset_0_-3px_0_var(--color-turquesa)]",
+          "text-muted-foreground hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-soft",
         swatch:
-          "rounded-full p-0 ring-offset-2 ring-offset-card data-[state=on]:ring-2 data-[state=on]:ring-foreground",
+          "p-0 ring-offset-2 ring-offset-card data-[state=on]:ring-2 data-[state=on]:ring-foreground",
       },
       size: {
-        default: "h-10 min-w-10 px-3 text-sm",
-        sm: "h-8 min-w-8 px-2 text-xs",
-        swatch: "size-7",
+        default: "h-8 px-3.5",
+        sm: "h-7 px-3",
+        swatch: "size-6",
       },
     },
     defaultVariants: {

@@ -2,95 +2,62 @@
 @import "tw-animate-css";
 
 /*
-  Tokens de design-dna.json. Paleta medida de /referencias:
-  #f6f6f5 fondo, #441e33 ciruela (también texto), #410b29 ciruela profundo,
-  #07a7a4 turquesa, #d6a020 mostaza, #db2224 rojo, #1d1817 carbón.
-  Radios: todo en esquinas vivas; solo la insignia del logo y las muestras de
-  color son circulares (regla documentada en el DNA).
+  Tokens de design-dna.json: estudio de producto claro, tipo catálogo.
+  Gris cálido casi blanco con un degradé muy sutil, una sola grotesca
+  (Geist) y un único acento vivo para las acciones principales.
+  Radios: tarjetas y paneles 16px, campos 12px, botones en píldora.
 */
 
 @theme {
-  --font-display: "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
-  --font-inline: "Bungee Inline", "Barlow Condensed", ui-sans-serif, sans-serif;
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
 
-  --color-papel: #f6f6f5;
-  --color-tinta: #441e33;
-  --color-carbon: #1d1817;
-  --color-ciruela: #441e33;
-  --color-ciruela-profundo: #410b29;
-  --color-ciruela-claro: #5a2a48;
-  --color-vino: #581c2a;
-  --color-turquesa: #07a7a4;
-  /* sombras de turquesa para texto blanco encima (contraste AA) */
-  --color-turquesa-profundo: #067f7c;
-  --color-turquesa-hondo: #056a68;
-  --color-mostaza: #d6a020;
-  --color-rojo: #db2224;
-  --color-crema: #f1f1f1;
-  --color-niebla: #e1e4df;
-  --color-gris: #969597;
-  --color-gris-oscuro: #69696a;
-  --color-madera: #e1ceab;
-  --color-madera-oscura: #b09672;
-  --color-madera-sombra: #794f27;
+  --shadow-soft: 0 1px 2px rgb(var(--shadow-rgb) / 0.06), 0 8px 24px -12px rgb(var(--shadow-rgb) / 0.18);
+  --shadow-float: 0 2px 6px rgb(var(--shadow-rgb) / 0.05), 0 24px 48px -24px rgb(var(--shadow-rgb) / 0.28);
 
-  --shadow-low: 0 1px 2px rgba(68, 30, 51, 0.08);
-  --shadow-medium: 0 8px 24px -8px rgba(68, 30, 51, 0.18);
-  --shadow-high: 0 24px 48px -16px rgba(65, 11, 41, 0.35);
-
-  --ease-encastre: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-viaje: cubic-bezier(0.16, 1, 0.3, 1);
-
-  --breakpoint-xs: 400px;
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root {
-  --z-canvas: 0;
   --z-overlay: 10;
-  --z-sheet: 20;
+  --z-panel: 20;
   --z-header: 30;
   --z-modal: 50;
   --z-tooltip: 60;
 
-  --background: var(--color-papel);
-  --foreground: var(--color-tinta);
-  --card: #ffffff;
-  --card-foreground: var(--color-tinta);
-  --primary: var(--color-ciruela);
-  --primary-foreground: var(--color-crema);
-  --muted: #ebebeb;
-  --muted-foreground: #5f5e60;
-  --border: #d9d9d9;
-  --input: #bdbcbe;
-  --ring: var(--color-turquesa);
-  --heading: var(--color-ciruela);
-  --pattern-base: #f6f6f5;
-  --pattern-diamond: #efefef;
-  --pattern-cell: #e9e9e9;
-  --band: #ffffff;
-  --band-shadow: 0 -10px 24px -14px rgba(68, 30, 51, 0.22), 0 10px 24px -14px rgba(68, 30, 51, 0.22);
+  --background: #f3f1ee;
+  --background-deep: #e8e4df;
+  --foreground: #1b1a18;
+  --card: #fbfaf8;
+  --card-foreground: #1b1a18;
+  --muted: #ebe8e3;
+  --muted-foreground: #66625c;
+  --border: #e0dbd4;
+  --input: #cbc5bd;
+  --accent: #2f4bff;
+  --accent-hover: #2440e6;
+  --accent-foreground: #ffffff;
+  --ring: #2f4bff;
+  --danger: #b8322a;
+  --shadow-rgb: 40 34 28;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #24111d;
-    --foreground: var(--color-crema);
-    --card: #33192a;
-    --card-foreground: var(--color-crema);
-    --primary: #5a2a48;
-    --primary-foreground: var(--color-crema);
-    --muted: #3a1f31;
-    --muted-foreground: #c9bfc5;
-    --border: #4a2a3e;
-    --input: #6e4a61;
-    --ring: var(--color-turquesa);
-    --heading: var(--color-crema);
-    --pattern-base: #24111d;
-    --pattern-diamond: #2a1522;
-    --pattern-cell: #2f1827;
-    --band: #33192a;
-    --band-shadow: 0 -10px 24px -14px rgba(0, 0, 0, 0.6), 0 10px 24px -14px rgba(0, 0, 0, 0.6);
+    --background: #191817;
+    --background-deep: #121110;
+    --foreground: #f1efeb;
+    --card: #232120;
+    --card-foreground: #f1efeb;
+    --muted: #2d2b29;
+    --muted-foreground: #aaa59e;
+    --border: #363330;
+    --input: #4d4945;
+    --accent: #4a63ff;
+    --accent-hover: #5c73ff;
+    --accent-foreground: #ffffff;
+    --ring: #7b8dff;
+    --danger: #ff8a7f;
+    --shadow-rgb: 0 0 0;
   }
 }
 
@@ -99,15 +66,15 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);
-  --color-heading: var(--heading);
-  --color-band: var(--band);
+  --color-danger: var(--danger);
 }
 
 @layer base {
@@ -115,100 +82,63 @@
     border-color: var(--border);
   }
 
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
   html {
     color-scheme: light dark;
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* la app ocupa exactamente la pantalla: la página nunca scrollea */
   body {
-    @apply bg-background font-sans text-foreground antialiased;
-    min-height: 100dvh;
+    @apply font-sans text-foreground antialiased;
+    overflow: hidden;
+    overscroll-behavior: none;
+    background: radial-gradient(120% 90% at 50% 18%, var(--background) 0%, var(--background) 45%, var(--background-deep) 100%)
+      fixed;
+    font-feature-settings: "ss01", "tnum" 0;
   }
 
   ::selection {
-    background: var(--color-turquesa);
-    color: var(--color-crema);
+    background: var(--accent);
+    color: var(--accent-foreground);
   }
 }
 
-/*
-  Cinta CTA de ref-1: relleno turquesa con extremos cortados en diagonal y una
-  franja inferior desplazada con degradé mostaza a rojo.
-*/
 @layer components {
-  .ribbon {
-    isolation: isolate;
-    background: none;
-    padding-inline: 2.25rem;
-  }
-
-  .ribbon::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--ribbon-fill, var(--color-turquesa-profundo));
-    clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 50%, 100% 100%, 0 100%, 12px 50%);
-    transition: background-color 150ms;
-  }
-
-  .ribbon:hover::before {
-    background: var(--ribbon-fill-hover, var(--color-turquesa-hondo));
-  }
-
-  .ribbon::after {
-    content: "";
-    position: absolute;
-    left: 14px;
-    right: 6px;
-    bottom: -8px;
-    height: 8px;
-    z-index: -2;
-    background: linear-gradient(90deg, var(--color-mostaza), #e8682a 55%, var(--color-rojo));
-    clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 6px 100%);
-    transition: transform 200ms var(--ease-viaje);
-  }
-
-  .ribbon:hover::after {
-    transform: translateX(6px);
-  }
-
-  .display-inline {
-    font-family: var(--font-inline);
-    font-weight: 400;
-    line-height: 0.95;
-    letter-spacing: 0.01em;
-  }
-
-  /* tabla de ref-1: veta horizontal y canto delantero más oscuro */
-  .wood {
-    background-color: var(--color-madera);
-    background-image:
-      linear-gradient(180deg, transparent calc(100% - 12px), var(--color-madera-sombra) calc(100% - 12px)),
-      repeating-linear-gradient(
-        180deg,
-        rgba(121, 79, 39, 0.1) 0 2px,
-        transparent 2px 9px,
-        rgba(176, 150, 114, 0.35) 9px 12px,
-        transparent 12px 17px
-      ),
-      linear-gradient(180deg, var(--color-madera), #d6bf98 60%, var(--color-madera-oscura));
-  }
-
-  /* halo del color de fondo para leer texto sobre el modelo 3D */
-  .halo {
-    text-shadow:
-      0 0 2px var(--background),
-      0 0 10px var(--background),
-      0 0 18px var(--background);
-  }
-
   .no-scrollbar {
     scrollbar-width: none;
   }
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* brillo que recorre la silueta mientras carga el 3D */
+  .shimmer {
+    background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.55) 50%, transparent 70%);
+    background-size: 220% 100%;
+    animation: shimmer 1.6s var(--ease-out-soft) infinite;
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: 120% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .shimmer {
+    background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.08) 50%, transparent 70%);
+    background-size: 220% 100%;
   }
 }
 
@@ -219,6 +149,5 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }

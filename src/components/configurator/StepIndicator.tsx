@@ -11,24 +11,18 @@ export function StepIndicator({ className }: { className?: string }) {
 
   return (
     <nav aria-label="Pasos del armado" className={className}>
-      <ol className="flex items-center">
+      <ol className="flex items-center gap-0.5 rounded-full border bg-card p-1 shadow-soft">
         {STEPS.map((step, i) => {
           const done = i < placed
           const active = phase === "building" && i === placed
           const reachable = i <= placed
           return (
-            <li key={step.id} className="flex items-center">
-              {i > 0 ? (
-                <span
-                  aria-hidden="true"
-                  className={cn("h-0.5 w-3 transition-colors sm:w-6 lg:w-8", i <= placed ? "bg-primary" : "bg-border")}
-                />
-              ) : null}
+            <li key={step.id}>
               <button
                 type="button"
                 disabled={!reachable || active}
                 aria-current={active ? "step" : undefined}
-                aria-label={`${i + 1}. ${step.label}${done ? ", encastrada. Tocá para despiezar desde acá" : ""}`}
+                aria-label={`Paso ${i + 1}, ${step.label}${done ? ": encastrada, tocá para volver a esta capa" : ""}`}
                 onClick={() => {
                   if (i < placed) {
                     playLift()
@@ -36,29 +30,21 @@ export function StepIndicator({ className }: { className?: string }) {
                   }
                 }}
                 className={cn(
-                  "group flex items-center gap-2.5 px-1.5 py-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60 disabled:cursor-default",
-                  done && "cursor-pointer"
+                  "flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/45 disabled:cursor-default",
+                  active && "bg-foreground text-background",
+                  done && "text-foreground hover:bg-muted",
+                  !active && !done && "text-muted-foreground"
                 )}
               >
                 <span
                   className={cn(
-                    "grid size-8 shrink-0 place-items-center font-display text-base font-bold transition-[background-color,color,transform] duration-300",
-                    active && "scale-110 bg-turquesa-profundo text-crema",
-                    done && "bg-primary text-primary-foreground group-hover:bg-rojo",
-                    !active && !done && "border-2 border-input bg-background text-muted-foreground"
+                    "grid size-5 place-items-center rounded-full text-[11px] tabular-nums",
+                    active ? "bg-background/20" : done ? "bg-muted" : "border border-input"
                   )}
                 >
-                  {done ? <Check weight="bold" className="size-4" /> : i + 1}
+                  {done ? <Check weight="bold" className="size-3" /> : i + 1}
                 </span>
-                <span
-                  className={cn(
-                    "font-display text-sm font-semibold tracking-wide uppercase",
-                    active ? "text-heading" : "text-muted-foreground",
-                    !active && "hidden md:inline"
-                  )}
-                >
-                  {step.label}
-                </span>
+                <span className={cn(!active && "hidden md:inline")}>{step.label}</span>
               </button>
             </li>
           )

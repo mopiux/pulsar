@@ -37,7 +37,7 @@ export function PlateSwatch({ plate }: { plate: PlateOption }) {
         height="63"
         rx="3"
         fill="none"
-        stroke={plate.translucent ? "#9fb0bc" : "var(--color-gris)"}
+        stroke={plate.translucent ? "#9fb0bc" : "var(--muted-foreground)"}
         strokeOpacity={plate.translucent ? 1 : 0.45}
       />
     </svg>
@@ -81,8 +81,8 @@ export function KeycapSwatch({ set }: { set: KeycapSet }) {
               y={23}
               textAnchor="middle"
               dominantBaseline="middle"
-              fontFamily="Barlow Condensed, sans-serif"
-              fontWeight={600}
+              fontFamily="Geist Variable, sans-serif"
+              fontWeight={560}
               fontSize={11}
               fill={cap.ink}
             >
@@ -99,8 +99,8 @@ export function KnobSwatch({ option, color }: { option: KnobOption; color: strin
   if (!color) {
     return (
       <svg viewBox="0 0 120 80" className="h-auto w-full" aria-hidden="true">
-        <circle cx="60" cy="40" r="24" fill="none" stroke="var(--color-gris)" strokeWidth="2" strokeDasharray="5 5" />
-        <path d="M44 56 L76 24" stroke="var(--color-gris)" strokeWidth="2" />
+        <circle cx="60" cy="40" r="24" fill="none" stroke="var(--muted-foreground)" strokeWidth="2" strokeDasharray="5 5" />
+        <path d="M44 56 L76 24" stroke="var(--muted-foreground)" strokeWidth="2" />
       </svg>
     )
   }

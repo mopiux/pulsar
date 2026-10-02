@@ -2,37 +2,18 @@ import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRe
 import { Keyboard as KeyboardIcon } from "@phosphor-icons/react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
-import { DiamondPattern } from "@/components/effects/DiamondPattern"
-import { TextEffect } from "@/components/effects/TextEffect"
 import { KeyboardPreview } from "@/components/previews/KeyboardPreview"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
-import { activeStepIndex, LAYER_COUNT, STEPS, useConfigurator } from "@/store/configurator"
+import { LAYER_COUNT, useConfigurator } from "@/store/configurator"
 
-// three.js y la escena van en un chunk aparte: la interfaz pinta antes
-const Scene = lazy(() => import("@/three/Scene").then((m) => ({ default: m.Scene })))
-
-import { PriceTag } from "./CtaRow"
-import { LayerBand } from "./LayerBand"
-import { MobileSheet } from "./MobileSheet"
+import { ConfiguratorPanel } from "./ConfiguratorPanel"
 import { StepIndicator } from "./StepIndicator"
 import { SummaryPanel } from "./SummaryPanel"
 
-const COMPLETE_TITLE = "Listo, es tuyo"
-const COMPLETE_HINT = "Revisalo, compartilo o encargalo. Para cambiar una capa, despiezalo."
-const SPIN_HINT = "Cerrando la carcasa y dándole una vuelta."
+// three.js y la escena van en un chunk aparte que se pide recién al montar
+const Scene = lazy(() => import("@/three/Scene"))
 
-const SUMMARY_WIDTH = 380
-
-/** Celdas resaltadas del patrón de rombos, repartidas a mano como en ref-1. */
-const PATTERN_CELLS: Array<[number, number]> = [
-  [1, 0],
-  [4, 1],
-  [8, 0],
-  [10, 2],
-  [2, 3],
-  [12, 1],
-  [6, 3],
-]
+const SUMMARY_WIDTH = 340
 
 function useAssembleAll() {
   const reduce = useReducedMotion()
@@ -63,156 +44,142 @@ function useAssembleAll() {
   return { assemble, assembling }
 }
 
-export function Configurator() {
+/** Mide el alto de un elemento y lo actualiza al cambiar de tamaño. */
+function useHeight<T extends HTMLElement>(deps: unknown[]) {
+  const ref = useRef<T>(null)
+  const [height, setHeight] = useState(0)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) {
+      setHeight(0)
+      return
+    }
+    const ro = new ResizeObserver(() => setHeight(el.getBoundingClientRect().height))
+    ro.observe(el)
+    setHeight(el.getBoundingClientRect().height)
+    return () => ro.disconnect()
+  }, deps)
+  return [ref, height] as const
+}
+
+export function Configurator({ visible }: { visible: boolean }) {
   const reduce = useReducedMotion() ?? false
   const isDesktop = useMediaQuery("(min-width: 1024px)")
-  const placed = useConfigurator((s) => s.placed)
   const phase = useConfigurator((s) => s.phase)
-  const config = useConfigurator((s) => s.config)
-  const step = STEPS[activeStepIndex(placed)]
   const { assemble, assembling } = useAssembleAll()
 
   const [ready, setReady] = useState(false)
   const onReady = useCallback(() => setReady(true), [])
 
-  const topRef = useRef<HTMLDivElement>(null)
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const [topH, setTopH] = useState(0)
-  const [bottomH, setBottomH] = useState(0)
-  const [sheetH, setSheetH] = useState(0)
+  const [topRef, topH] = useHeight<HTMLDivElement>([isDesktop])
+  const [bottomRef, bottomH] = useHeight<HTMLDivElement>([isDesktop, phase])
+  const rootRef = useRef<HTMLElement>(null)
 
-  useLayoutEffect(() => {
-    const observe = (el: HTMLElement | null, set: (n: number) => void) => {
-      if (!el) return () => undefined
-      const ro = new ResizeObserver(() => set(el.getBoundingClientRect().height))
-      ro.observe(el)
-      set(el.getBoundingClientRect().height)
-      return () => ro.disconnect()
+  // la rueda nunca desplaza la página dentro del configurador: solo la usa
+  // la cámara (zoom) o una lista que tenga su propio scroll
+  useEffect(() => {
+    const el = rootRef.current
+    if (!el) return
+    const onWheel = (event: WheelEvent) => {
+      const scroller = (event.target as Element).closest<HTMLElement>("[data-scroll]")
+      if (scroller && scroller.scrollHeight > scroller.clientHeight) return
+      event.preventDefault()
     }
-    const a = observe(topRef.current, setTopH)
-    const b = observe(bottomRef.current, setBottomH)
-    return () => {
-      a()
-      b()
-    }
-  }, [isDesktop, phase])
+    el.addEventListener("wheel", onWheel, { passive: false })
+    return () => el.removeEventListener("wheel", onWheel)
+  }, [])
 
-  const title = phase === "building" ? step.title : COMPLETE_TITLE
-  const hint = phase === "building" ? step.hint : phase === "spinning" ? SPIN_HINT : COMPLETE_HINT
   const showSummary = phase === "complete"
-
   const cover = useMemo(
-    () => ({
-      top: topH,
-      bottom: isDesktop ? (phase === "building" ? bottomH : 24) : sheetH,
-      left: 0,
-      right: isDesktop && showSummary ? SUMMARY_WIDTH + 24 : 0,
-    }),
-    [topH, bottomH, sheetH, isDesktop, phase, showSummary]
+    () =>
+      isDesktop
+        ? {
+            top: topH + 12,
+            bottom: phase === "building" ? bottomH + 16 : 0,
+            left: 0,
+            right: showSummary ? SUMMARY_WIDTH + 20 : 0,
+          }
+        : { top: topH + 8, bottom: 0, left: 0, right: 0 },
+    [isDesktop, topH, bottomH, phase, showSummary]
   )
 
-  return (
-    <section
-      id="configurador"
-      aria-label="Configurador de teclado"
-      className="relative isolate h-[calc(100dvh-3.5rem)] min-h-[620px] scroll-mt-14 overflow-hidden bg-background lg:min-h-[700px]"
-    >
-      <DiamondPattern cells={PATTERN_CELLS} className="-z-10" />
-
-      <div className="absolute inset-0">
-        <Suspense fallback={null}>
-          <Scene reduced={reduce} cover={cover} onReady={onReady} fallback={<NoWebGL onShow={onReady} />} />
-        </Suspense>
-      </div>
-
-      <AnimatePresence>
-        {!ready ? (
-          <motion.div
-            key="cargando"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="pointer-events-none absolute inset-0 grid place-items-center"
-          >
-            <div className="flex w-[min(520px,80vw)] animate-pulse flex-col items-center gap-4 opacity-70">
-              <KeyboardPreview config={config} skeleton />
-              <p className="font-display text-lg font-semibold tracking-wide text-muted-foreground uppercase">
-                Preparando el banco de trabajo
-              </p>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-
-      {/* arriba: pasos e instrucción */}
-      <div
-        ref={topRef}
-        className="pointer-events-none absolute inset-x-0 top-0 z-(--z-overlay) flex flex-col items-center gap-2 px-4 pt-6 text-center lg:pt-8"
-      >
+  const stage = (
+    <div className="absolute inset-0">
+      <Suspense fallback={null}>
+        <Scene reduced={reduce} visible={visible} cover={cover} onReady={onReady} fallback={<NoWebGL onShow={onReady} />} />
+      </Suspense>
+      <AnimatePresence>{!ready ? <Loading key="cargando" /> : null}</AnimatePresence>
+      <div ref={topRef} className="pointer-events-none absolute inset-x-0 top-3 z-(--z-overlay) flex justify-center px-3">
         <StepIndicator className="pointer-events-auto" />
-        {isDesktop ? (
-          <div className="flex flex-col items-center">
-            <TextEffect
-              as="h2"
-              id={`${phase}-${step.id}`}
-              className="halo font-display text-3xl leading-tight font-bold text-heading"
-            >
-              {title}
-            </TextEffect>
-            <p className="halo max-w-[60ch] text-base text-muted-foreground">{hint}</p>
-          </div>
-        ) : null}
       </div>
+    </div>
+  )
 
-      {isDesktop ? (
-        <>
-          <div ref={bottomRef} className="absolute inset-x-0 bottom-0 z-(--z-overlay)">
-            {phase === "building" ? (
-              <>
-                <LayerBand variant="desktop" onAssemble={assemble} assembling={assembling} />
-                <div aria-hidden="true" className="wood h-14 shadow-[inset_0_10px_14px_-10px_rgba(65,11,41,0.35)]" />
-              </>
-            ) : null}
-          </div>
-          <AnimatePresence>
-            {showSummary ? (
-              <SummaryPanel
-                key="resumen"
-                style={{ top: Math.max(96, topH + 8) }}
-                className="absolute right-6 bottom-6 z-(--z-overlay) max-h-[700px] w-[380px]"
-              />
-            ) : null}
-          </AnimatePresence>
-          <TypingHint />
-        </>
-      ) : (
-        <MobileSheet
-          onVisibleHeight={setSheetH}
-          header={
-            <div className="flex items-end justify-between gap-3 px-4 pb-3">
-              <div className="min-w-0">
-                <TextEffect
-                  as="h2"
-                  id={`${phase}-${step.id}`}
-                  className="font-display text-2xl leading-tight font-bold text-heading"
-                >
-                  {title}
-                </TextEffect>
-                <p className="text-sm text-muted-foreground">{hint}</p>
-              </div>
-              {phase === "building" ? <PriceTag align="right" className="shrink-0" /> : null}
-            </div>
-          }
+  if (!isDesktop) {
+    return (
+      <section ref={rootRef} aria-label="Configurador de teclado" className="flex h-full flex-col overflow-hidden">
+        {/* el modelo ocupa al menos el 55% de la pantalla; el panel, el resto */}
+        <div className="relative min-h-[55dvh] flex-1">{stage}</div>
+        <div
+          data-scroll
+          className="min-h-0 shrink overflow-y-auto overscroll-contain rounded-t-2xl border-t bg-card pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-12px_32px_-20px_rgb(var(--shadow-rgb)/0.35)]"
         >
           {phase === "building" ? (
-            <LayerBand variant="mobile" onAssemble={assemble} assembling={assembling} className="pb-5" />
+            <ConfiguratorPanel variant="mobile" onAssemble={assemble} assembling={assembling} />
           ) : showSummary ? (
-            <SummaryPanel compact className="shadow-none" />
+            <SummaryPanel compact />
           ) : (
-            <div className="h-24" />
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">Cerrando la carcasa y dándole una vuelta.</p>
           )}
-        </MobileSheet>
-      )}
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section ref={rootRef} aria-label="Configurador de teclado" className="relative h-full overflow-hidden">
+      {stage}
+      <TypingHint />
+      <div ref={bottomRef} className="absolute inset-x-0 bottom-4 z-(--z-panel) flex justify-center px-6">
+        {phase === "building" ? (
+          <ConfiguratorPanel variant="desktop" onAssemble={assemble} assembling={assembling} className="max-w-[1120px]" />
+        ) : null}
+      </div>
+      <AnimatePresence>
+        {showSummary ? (
+          <SummaryPanel
+            key="resumen"
+            style={{ width: SUMMARY_WIDTH }}
+            className="absolute top-4 right-5 bottom-5 z-(--z-panel)"
+          />
+        ) : null}
+      </AnimatePresence>
     </section>
+  )
+}
+
+function Loading() {
+  const config = useConfigurator((s) => s.config)
+  return (
+    <motion.div
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.45 }}
+      className="pointer-events-none absolute inset-0 z-(--z-overlay) grid place-items-center"
+      role="status"
+    >
+      <div className="flex w-[min(460px,76vw)] flex-col items-center gap-5">
+        <div className="relative w-full overflow-hidden rounded-lg">
+          <KeyboardPreview config={config} skeleton />
+          <div className="shimmer absolute inset-0" />
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-sm font-medium text-muted-foreground">Preparando el estudio</p>
+          <div className="h-0.5 w-32 overflow-hidden rounded-full bg-border">
+            <div className="shimmer h-full w-full bg-muted-foreground/30" />
+          </div>
+        </div>
+      </div>
+    </motion.div>
   )
 }
 
@@ -220,8 +187,8 @@ function TypingHint() {
   const finePointer = useMediaQuery("(pointer: fine)")
   if (!finePointer) return null
   return (
-    <p className="absolute top-6 right-6 z-(--z-overlay) flex items-center gap-2 bg-card/90 px-3 py-2 font-display text-sm font-semibold tracking-wide text-muted-foreground uppercase shadow-low">
-      <KeyboardIcon weight="bold" className="size-5 text-turquesa-profundo" />
+    <p className="absolute top-4 left-5 z-(--z-overlay) flex items-center gap-2 text-[13px] text-muted-foreground">
+      <KeyboardIcon weight="regular" className="size-4" />
       Tipeá en tu teclado para probarlo
     </p>
   )
@@ -232,11 +199,10 @@ function NoWebGL({ onShow }: { onShow: () => void }) {
   useEffect(() => onShow(), [onShow])
   return (
     <div className="grid h-full place-items-center px-6">
-      <div className="flex w-[min(560px,90vw)] flex-col items-center gap-4 text-center">
+      <div className="flex w-[min(520px,88vw)] flex-col items-center gap-4 text-center">
         <KeyboardPreview config={config} title="Vista plana de tu teclado" />
-        <p className="max-w-[48ch] text-base text-foreground">
-          Tu navegador no pudo iniciar la vista 3D. Igual podés armar el teclado: los cambios se ven en esta vista plana.
-          Para verlo en 3D, probá con Chrome, Firefox o Safari actualizados.
+        <p className="max-w-[46ch] text-sm text-muted-foreground">
+          Tu navegador no pudo iniciar la vista 3D. Igual podés armar el teclado y ver los cambios en esta vista plana.
         </p>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { ArrowFatUp, ArrowSquareOut } from "@phosphor-icons/react"
+import { ArrowFatUp, ArrowUpRight } from "@phosphor-icons/react"
 import { motion, useReducedMotion } from "motion/react"
 import { toast } from "sonner"
 
@@ -63,71 +63,71 @@ export function Gallery() {
   }, [voted])
 
   return (
-    <section id="galeria" aria-labelledby="galeria-titulo" className="scroll-mt-14 bg-ciruela-profundo text-crema">
-      <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:py-24">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <h2 id="galeria-titulo" className="display-inline text-[clamp(3.5rem,10vw,6.5rem)] text-turquesa">
-            Votá
-          </h2>
-          <p className="max-w-[46ch] text-lg text-crema/80">
-            Teclados que armó la comunidad. Votá tus favoritos o abrí cualquiera en el configurador para hacerlo tuyo.
-          </p>
-        </div>
-
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as GalleryFilter)} className="mt-8 items-center">
+    <section aria-labelledby="galeria-titulo" data-scroll className="h-full overflow-y-auto overscroll-contain">
+      <Tabs value={filter} onValueChange={(v) => setFilter(v as GalleryFilter)} className="mx-auto max-w-[1180px] gap-5 px-4 py-6 sm:px-6 lg:py-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 id="galeria-titulo" className="text-2xl font-semibold tracking-tight">
+              Galería de la comunidad
+            </h1>
+            <p className="mt-1 max-w-[52ch] text-sm text-muted-foreground">
+              Votá tus favoritos o abrí cualquiera en el configurador para hacerlo tuyo.
+            </p>
+          </div>
           <TabsList aria-label="Ordenar la galería">
             {GALLERY_FILTERS.map((f) => (
-              <TabsTrigger key={f.id} value={f.id} style={{ "--tab-color": f.color, "--tab-ink": f.ink }}>
+              <TabsTrigger key={f.id} value={f.id}>
                 {f.label}
               </TabsTrigger>
             ))}
           </TabsList>
-          {GALLERY_FILTERS.map((f) => (
-            <TabsContent key={f.id} value={f.id} className="mt-2 w-full">
-              <ul className="grid gap-0.5 sm:grid-cols-2 lg:grid-cols-3">
-                {sorted[f.id].map((build, index) => (
-                  <PosterCard
-                    key={build.id}
-                    build={build}
-                    index={index}
-                    filter={f}
-                    voted={voted.has(build.id)}
-                    onVote={() => toggleVote(build.id)}
-                  />
-                ))}
-              </ul>
-            </TabsContent>
-          ))}
-        </Tabs>
-      </div>
+        </div>
+        {GALLERY_FILTERS.map((f) => (
+          <TabsContent key={f.id} value={f.id}>
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {sorted[f.id].map((build, index) => (
+                <BuildCard
+                  key={build.id}
+                  build={build}
+                  index={index}
+                  filter={f.id}
+                  voted={voted.has(build.id)}
+                  onVote={() => toggleVote(build.id)}
+                />
+              ))}
+            </ul>
+          </TabsContent>
+        ))}
+        <p className="pt-2 text-center text-xs text-muted-foreground">Pulsa. Teclados mecánicos armados a mano en Buenos Aires.</p>
+      </Tabs>
     </section>
   )
 }
 
-interface PosterCardProps {
+interface BuildCardProps {
   build: CommunityBuild
   index: number
-  filter: (typeof GALLERY_FILTERS)[number]
+  filter: GalleryFilter
   voted: boolean
   onVote: () => void
 }
 
-function PosterCard({ build, index, filter, voted, onVote }: PosterCardProps) {
+function BuildCard({ build, index, filter, voted, onVote }: BuildCardProps) {
   const reduce = useReducedMotion()
   const loadConfig = useConfigurator((s) => s.loadConfig)
-  const dark = build.ink === "dark"
+  const setView = useConfigurator((s) => s.setView)
   const votes = build.votes + (voted ? 1 : 0)
 
   const tag =
-    filter.id === "recientes"
+    filter === "recientes"
       ? publishedLabel(build.publishedAt)
-      : filter.id === "tendencia"
+      : filter === "tendencia"
         ? `+${build.weeklyVotes} esta semana`
         : `Puesto ${index + 1}`
 
   const open = () => {
     loadConfig(build.config)
-    document.getElementById("configurador")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" })
+    setView("configurador")
     toast.success(`Abriste “${build.name}”`, {
       description: "Está armado tal cual lo dejó su autor. Despiezalo para cambiar lo que quieras.",
     })
@@ -137,32 +137,31 @@ function PosterCard({ build, index, filter, voted, onVote }: PosterCardProps) {
 
   return (
     <motion.li
-      initial={reduce ? false : { opacity: 0, y: 24 }}
+      initial={reduce ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 220, damping: 26, delay: index * 0.05 }}
-      className={cn("group relative flex min-h-[440px] flex-col overflow-hidden", dark ? "text-ciruela-profundo" : "text-crema")}
-      style={{ background: build.poster }}
+      transition={{ type: "spring", stiffness: 240, damping: 28, delay: index * 0.04 }}
+      className="group flex flex-col rounded-2xl border bg-card p-3 shadow-soft"
     >
-      <span
-        className="absolute top-0 left-4 px-3 py-1.5 font-display text-xs font-bold tracking-[0.12em] uppercase"
-        style={{ background: filter.color, color: filter.ink }}
-      >
-        {tag}
-      </span>
-
-      <div className="flex flex-col items-center px-6 pt-14 text-center">
-        <h3 className="font-display text-[clamp(2rem,3.4vw,2.6rem)] leading-[0.95] font-extrabold uppercase">{build.name}</h3>
-        <p className="mt-2 text-[15px] italic opacity-85">por {build.author}</p>
-        <p className="mt-1 text-sm opacity-70">{specs}</p>
-      </div>
-
-      <div className="relative mt-6 px-8 [perspective:900px]">
-        <div className="origin-bottom transition-transform duration-500 ease-(--ease-viaje) [transform:rotateX(38deg)] group-hover:[transform:rotateX(28deg)_translateY(-6px)_scale(1.04)]">
+      {/* mini estudio: la misma superficie que el configurador, en chico */}
+      <div className="relative grid h-[150px] place-items-center overflow-hidden rounded-xl bg-[radial-gradient(120%_100%_at_50%_20%,var(--background),var(--background-deep))] [perspective:900px]">
+        <span className="absolute top-2.5 left-2.5 rounded-full bg-card/85 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+          {tag}
+        </span>
+        <div className="w-[78%] transition-transform duration-500 ease-(--ease-out-soft) [transform:rotateX(34deg)_translateY(6px)] group-hover:[transform:rotateX(26deg)_translateY(0)_scale(1.04)]">
           <KeyboardPreview config={build.config} title={`Teclado ${build.name}`} />
         </div>
       </div>
 
-      <div className="mt-auto flex items-center justify-between gap-2 px-4 pt-6 pb-4">
+      <div className="flex items-start justify-between gap-3 px-1 pt-3">
+        <div className="min-w-0">
+          <h2 className="truncate text-[15px] font-semibold tracking-tight">{build.name}</h2>
+          <p className="truncate text-[13px] text-muted-foreground">
+            por {build.author}, {specs}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-2 px-1">
         <motion.button
           type="button"
           onClick={onVote}
@@ -170,30 +169,16 @@ function PosterCard({ build, index, filter, voted, onVote }: PosterCardProps) {
           aria-pressed={voted}
           aria-label={`${voted ? "Quitar tu voto a" : "Votar"} ${build.name}, ${votes} votos`}
           className={cn(
-            "flex h-10 items-center gap-2 px-3 font-display text-lg font-bold tabular-nums transition-colors outline-none focus-visible:ring-[3px]",
-            dark ? "focus-visible:ring-ciruela/50" : "focus-visible:ring-crema/60",
-            voted
-              ? dark
-                ? "bg-ciruela-profundo text-mostaza"
-                : "bg-crema text-ciruela"
-              : dark
-                ? "bg-ciruela-profundo/10 hover:bg-ciruela-profundo/20"
-                : "bg-black/20 hover:bg-black/30"
+            "flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium tabular-nums transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/45",
+            voted ? "bg-foreground text-background" : "bg-muted text-foreground hover:bg-border"
           )}
         >
-          <ArrowFatUp weight={voted ? "fill" : "bold"} className="size-5" />
+          <ArrowFatUp weight={voted ? "fill" : "regular"} className="size-4" />
           {votes}
         </motion.button>
-        <Button
-          size="sm"
-          onClick={open}
-          className={cn(
-            "h-10",
-            dark ? "bg-ciruela-profundo text-crema hover:bg-ciruela" : "bg-crema text-ciruela-profundo hover:bg-white"
-          )}
-        >
-          <ArrowSquareOut weight="bold" className="size-4" />
+        <Button variant="secondary" size="sm" onClick={open}>
           Abrir en el configurador
+          <ArrowUpRight className="size-3.5" />
         </Button>
       </div>
     </motion.li>

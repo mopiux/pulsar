@@ -1,268 +1,124 @@
 {
   "meta": {
-    "name": "Pulsa - Armado por capas",
-    "description": "ADN visual extraído de tres referencias: el armador de hamburguesas capa por capa (ref-1), su portada con galería y votos (ref-2) y una pila editorial de objetos 3D flotantes (ref-3). Superficie clara con rombos, barra ciruela, cintas turquesa con subrayado mostaza a rojo, mesa de madera bajo el producto y un bloque ciruela para la comunidad.",
+    "name": "Pulsa - Estudio de producto",
+    "description": "Dirección de catálogo: el teclado como protagonista sobre un estudio claro de gris cálido, interfaz mínima en una sola grotesca y un único acento vivo para las acciones principales. De las referencias se conserva solo la mecánica (armado capa por capa, carrusel con + y −, galería con votos), no su estética.",
     "source_references": [
-      "referencias/ref-1.png - armador capa por capa: barra ciruela, fondo claro con rombos, pieza flotando arriba, carrusel horizontal de ingredientes con + y -, producto sobre tabla de madera, CTA en cinta turquesa con subrayado degradé",
-      "referencias/ref-2.png - portada dividida: mitad clara 'CREATE' y mitad ciruela 'VOTE', mosaico de tres pósters con pestañas de color (Latest mostaza, Trending turquesa, Most popular rojo), autor en cursiva",
-      "referencias/ref-3.png - pila de libros 3D flotando separados verticalmente sobre fondo casi negro cálido, leve inclinación, sombra suave, índice vertical de marcas a la izquierda"
+      "Brief del cliente (segunda pasada): estudio de producto claro tipo fotografía de catálogo, fondo gris cálido casi blanco con degradé muy sutil, superficie mate bajo el teclado con sombra suave, un solo acento vivo, grotesca moderna, interfaz mínima, modo oscuro como variante",
+      "referencias/ref-1.png y ref-2.png - solo mecánica: armado por capas, carrusel con + y −, galería con filtros y votos",
+      "referencias/ref-3.png - solo mecánica: pila de objetos flotando separados"
     ],
     "created_at": "2026-10-02"
   },
   "design_system": {
     "color": {
-      "palette_type": "split-complementary",
+      "palette_type": "monochromatic",
       "primary": {
-        "hex": "#441e33",
-        "role": "Ciruela de marca, medido como color de texto en ref-1: barra de navegación, títulos y texto de interfaz sobre claro"
+        "hex": "#1b1a18",
+        "role": "Tinta: texto, paso activo del indicador, voto marcado, borde de la opción elegida"
       },
       "secondary": {
-        "hex": "#07a7a4",
-        "role": "Turquesa de acción: cintas CTA (en su sombra #067f7c cuando lleva texto blanco, para contraste AA), el + del carrusel, título display de la galería, pestaña Tendencia"
+        "hex": "#66625c",
+        "role": "Texto secundario, precios de cada opción, íconos en reposo"
       },
       "accent": {
-        "hex": "#d6a020",
-        "role": "Mostaza de énfasis: insignia del logo, etiqueta de precio, subrayado degradé de los CTA (mostaza a rojo #db2224), pestaña Recientes"
+        "hex": "#2f4bff",
+        "role": "Único acento vivo, solo para acciones principales: Encastrar y Encargar. Blanco encima con contraste 5,9:1. En modo oscuro #4a63ff (4,6:1)."
       },
       "neutral": {
         "scale": [
-          "#f6f6f5",
-          "#f1f1f1",
-          "#ebecec",
-          "#ced3c7",
-          "#929093",
-          "#69696a",
-          "#373038",
-          "#1d1817",
-          "#441e33"
+          "#fbfaf8",
+          "#f3f1ee",
+          "#ebe8e3",
+          "#e8e4df",
+          "#e0dbd4",
+          "#cbc5bd",
+          "#66625c",
+          "#1b1a18"
         ],
-        "usage": "#f6f6f5 es la superficie dominante del configurador. El texto medido en ref-1 es ciruela #441e33 (no un gris), así que el texto de cuerpo y los títulos van en ciruela; los grises #929093 y #69696a quedan para leyendas secundarias y los rombos del fondo. #1d1817 es el casi negro cálido de la pila flotante de ref-3, usado solo en un póster y en sombras."
+        "usage": "#f3f1ee a #e8e4df forman el fondo de estudio (degradé radial muy suave). #fbfaf8 es la superficie de paneles y tarjetas. #ebe8e3 rellena controles en píldora y muestras. #e0dbd4 bordes, #cbc5bd bordes de campos. #1b1a18 texto."
       },
       "semantic": {
-        "success": "#07a7a4",
-        "warning": "#d6a020",
-        "error": "#db2224",
-        "info": "#410b29"
+        "success": "#2f4bff",
+        "warning": "#66625c",
+        "error": "#b8322a",
+        "info": "#66625c"
       },
       "surface": {
-        "background": "#f6f6f5",
-        "card": "#ffffff",
-        "elevated": "#410b29"
+        "background": "#f3f1ee",
+        "card": "#fbfaf8",
+        "elevated": "#fbfaf8"
       },
-      "contrast_strategy": "Ciruela sobre claro en el configurador (#441e33 sobre #f6f6f5, 13,8:1); claro sobre ciruela profundo (#f1f1f1 sobre #410b29) en la galería. Un solo cambio de bloque de color deliberado, como en ref-2.",
-      "measurement": {
-        "k": 8,
-        "sampling": {
-          "method": "deterministic_stratified",
-          "max_pixels": 160000,
-          "sampled_pixels": 160000
-        },
-        "preprocessing": "Las capturas traen un marco oscuro (#222221) que no es parte del diseño: se recortó antes de medir (ref-1 40,19 677x677; ref-2 32,32 677x369; ref-3 6,6 973x614)."
-      },
-      "measured_palette": [
-        {
-          "hex": "#f6f6f5",
-          "coverage": 0.6022,
-          "role": "background",
-          "source": "ref-1"
-        },
-        {
-          "hex": "#e1ceab",
-          "coverage": 0.1554,
-          "role": "unassigned",
-          "source": "ref-1"
-        },
-        {
-          "hex": "#b09672",
-          "coverage": 0.0974,
-          "role": "unassigned",
-          "source": "ref-1"
-        },
-        {
-          "hex": "#441e33",
-          "coverage": 0.0541,
-          "role": "text",
-          "source": "ref-1"
-        },
-        {
-          "hex": "#d6a020",
-          "coverage": 0.035,
-          "role": "accent",
-          "source": "ref-1"
-        },
-        {
-          "hex": "#7f691f",
-          "coverage": 0.0293,
-          "role": "unassigned",
-          "source": "ref-1"
-        },
-        {
-          "hex": "#07a7a4",
-          "coverage": 0.0164,
-          "role": "unassigned",
-          "source": "ref-1"
-        },
-        {
-          "hex": "#c03d1b",
-          "coverage": 0.0102,
-          "role": "unassigned",
-          "source": "ref-1"
-        },
-        {
-          "hex": "#f1f1f1",
-          "coverage": 0.3065,
-          "role": "background",
-          "source": "ref-2"
-        },
-        {
-          "hex": "#410b29",
-          "coverage": 0.2942,
-          "role": "text",
-          "source": "ref-2"
-        },
-        {
-          "hex": "#e3c8a5",
-          "coverage": 0.1082,
-          "role": "unassigned",
-          "source": "ref-2"
-        },
-        {
-          "hex": "#db2224",
-          "coverage": 0.0652,
-          "role": "accent",
-          "source": "ref-2"
-        },
-        {
-          "hex": "#ad8e75",
-          "coverage": 0.0651,
-          "role": "unassigned",
-          "source": "ref-2"
-        },
-        {
-          "hex": "#0ea8a6",
-          "coverage": 0.0596,
-          "role": "unassigned",
-          "source": "ref-2"
-        },
-        {
-          "hex": "#794f27",
-          "coverage": 0.0554,
-          "role": "unassigned",
-          "source": "ref-2"
-        },
-        {
-          "hex": "#e3a329",
-          "coverage": 0.0459,
-          "role": "unassigned",
-          "source": "ref-2"
-        },
-        {
-          "hex": "#1d1817",
-          "coverage": 0.6826,
-          "role": "background",
-          "source": "ref-3"
-        },
-        {
-          "hex": "#69696a",
-          "coverage": 0.125,
-          "role": "unassigned",
-          "source": "ref-3"
-        },
-        {
-          "hex": "#ebecec",
-          "coverage": 0.057,
-          "role": "text",
-          "source": "ref-3"
-        },
-        {
-          "hex": "#373038",
-          "coverage": 0.0494,
-          "role": "unassigned",
-          "source": "ref-3"
-        },
-        {
-          "hex": "#ced3c7",
-          "coverage": 0.0387,
-          "role": "unassigned",
-          "source": "ref-3"
-        },
-        {
-          "hex": "#929093",
-          "coverage": 0.0318,
-          "role": "unassigned",
-          "source": "ref-3"
-        },
-        {
-          "hex": "#b6080e",
-          "coverage": 0.0109,
-          "role": "accent",
-          "source": "ref-3"
-        },
-        {
-          "hex": "#17cdf3",
-          "coverage": 0.0046,
-          "role": "unassigned",
-          "source": "ref-3"
-        }
-      ]
+      "contrast_strategy": "Tinta casi negra sobre gris cálido claro (15:1). El color fuerte lo ponen el teclado y sus opciones; la interfaz se queda en neutros y el acento aparece solo en la acción principal de cada momento.",
+      "dark_variant": {
+        "background": "#191817",
+        "background_deep": "#121110",
+        "card": "#232120",
+        "muted": "#2d2b29",
+        "border": "#363330",
+        "foreground": "#f1efeb",
+        "muted_foreground": "#aaa59e",
+        "accent": "#4a63ff",
+        "error": "#ff8a7f",
+        "notes": "Misma dirección en oscuro: estudio de fondo negro cálido, superficie mate #2a2826 bajo el teclado y sombra de contacto más densa."
+      }
     },
     "typography": {
       "type_scale": {
         "display": {
-          "size": "clamp(3rem, 7vw, 5.5rem)",
-          "weight": "400 (Bungee Inline es de un solo peso)",
-          "line_height": "0.95",
-          "tracking": "0.01em"
-        },
-        "heading_1": {
-          "size": "clamp(1.75rem, 3vw, 2.5rem)",
-          "weight": "700",
-          "line_height": "1.05",
-          "tracking": "0"
-        },
-        "heading_2": {
           "size": "1.5rem",
-          "weight": "700",
-          "line_height": "1.1",
-          "tracking": "0.01em"
-        },
-        "heading_3": {
-          "size": "1.125rem",
           "weight": "600",
           "line_height": "1.2",
-          "tracking": "0.02em"
+          "tracking": "-0.02em"
+        },
+        "heading_1": {
+          "size": "1.5rem",
+          "weight": "600",
+          "line_height": "1.2",
+          "tracking": "-0.02em"
+        },
+        "heading_2": {
+          "size": "1.125rem",
+          "weight": "600",
+          "line_height": "1.25",
+          "tracking": "-0.015em"
+        },
+        "heading_3": {
+          "size": "0.9375rem",
+          "weight": "600",
+          "line_height": "1.3",
+          "tracking": "-0.01em"
         },
         "body": {
-          "size": "1rem",
-          "weight": "400",
-          "line_height": "1.55",
-          "tracking": "0"
-        },
-        "body_small": {
           "size": "0.875rem",
           "weight": "400",
           "line_height": "1.5",
           "tracking": "0"
         },
-        "caption": {
+        "body_small": {
           "size": "0.8125rem",
+          "weight": "400",
+          "line_height": "1.45",
+          "tracking": "0"
+        },
+        "caption": {
+          "size": "0.75rem",
           "weight": "500",
           "line_height": "1.3",
-          "tracking": "0.01em"
+          "tracking": "0"
         },
         "overline": {
-          "size": "0.75rem",
-          "weight": "700",
-          "line_height": "1",
-          "tracking": "0.12em"
+          "size": "0.6875rem",
+          "weight": "500",
+          "line_height": "1.2",
+          "tracking": "0"
         }
       },
       "font_families": {
-        "heading": "\"Barlow Condensed\", ui-sans-serif, system-ui, sans-serif",
-        "body": "\"Barlow\", ui-sans-serif, system-ui, sans-serif",
-        "mono": "ui-monospace, \"SF Mono\", Menlo, monospace (solo tabular-nums en precios, sin etiquetas mono)"
+        "heading": "\"Geist Variable\", ui-sans-serif, system-ui, sans-serif",
+        "body": "\"Geist Variable\", ui-sans-serif, system-ui, sans-serif",
+        "mono": "ui-monospace, SFMono-Regular, Menlo, monospace (sin uso visible; los precios usan cifras tabulares de Geist)"
       },
-      "font_style_notes": "Grotesca condensada de aire DIN para navegación, instrucciones y nombres de ingredientes (ref-1). Títulos display gruesos y geométricos con una línea interior clara, rellenos en turquesa ('CREATE', 'VOTE'), reproducidos con Bungee Inline. Autor de cada póster en itálica pequeña del mismo cuerpo. Navegación en mayúsculas condensadas."
+      "font_style_notes": "Una sola grotesca moderna (Geist) en pesos 400 a 600, sin condensadas ni mayúsculas de cartel. Jerarquía por peso y tamaño chico; los títulos nunca compiten con el modelo. Las leyendas de las teclas del 3D usan la misma fuente."
     },
     "spacing": {
       "base_unit": "4px",
@@ -271,20 +127,18 @@
         "8px",
         "12px",
         "16px",
+        "20px",
         "24px",
-        "32px",
-        "48px",
-        "64px",
-        "96px"
+        "32px"
       ],
       "content_density": "comfortable",
-      "section_rhythm": "Dos grandes bloques a viewport completo (configurador claro, galería ciruela) unidos por un borde duro; dentro de cada uno, bandas horizontales de ancho completo (instrucción, carrusel, mesa) separadas por 16-32px."
+      "section_rhythm": "No hay secciones apiladas: la app ocupa exactamente la pantalla y cambia de vista (configurador, galería). Dentro de cada vista los márgenes son de 12 a 24px."
     },
     "layout": {
-      "grid_system": "Escenario central a ancho completo con bandas horizontales; galería en mosaico de 3 columnas de pósters verticales",
-      "max_content_width": "1280px",
-      "columns": "1 en el configurador (centrado sobre el producto), 3 en la galería escritorio, 2 en tableta, 1 en mobile",
-      "gutter": "2px entre pósters (los pósters de ref-2 están pegados), 24px de margen lateral",
+      "grid_system": "Escenario a pantalla completa con controles flotando en los bordes; galería en grilla de 3 columnas",
+      "max_content_width": "1180px (galería), 1120px (panel del configurador)",
+      "columns": "Configurador: una sola escena. Galería: 3 columnas en escritorio, 2 en tableta, 1 en mobile.",
+      "gutter": "16px",
       "breakpoints": [
         "640px",
         "768px",
@@ -295,136 +149,133 @@
     },
     "shape": {
       "border_radius": {
-        "small": "0px",
-        "medium": "2px",
-        "large": "4px",
-        "pill": "9999px (solo para la insignia circular del logo y las muestras de color)"
+        "small": "12px (campos)",
+        "medium": "12px (muestras del carrusel)",
+        "large": "16px (paneles y tarjetas)",
+        "pill": "9999px (botones, controles segmentados, indicador de pasos)"
       },
-      "border_usage": "subtle 1px en la banda del carrusel; nada de bordes en pósters",
-      "divider_style": "Bandas de color de ancho completo en lugar de líneas; el carrusel es una franja blanca con sombra superior e inferior."
+      "border_usage": "subtle 1px en paneles y tarjetas",
+      "divider_style": "Líneas de 1px solo dentro del resumen; el resto se separa con aire y superficies."
     },
     "elevation": {
       "shadow_style": "soft diffused",
       "levels": {
-        "low": "0 1px 2px rgba(68, 29, 53, 0.08)",
-        "medium": "0 8px 24px -8px rgba(68, 29, 53, 0.18)",
-        "high": "0 24px 48px -16px rgba(46, 22, 37, 0.35)"
+        "low": "0 1px 2px rgb(40 34 28 / 0.06), 0 8px 24px -12px rgb(40 34 28 / 0.18)",
+        "medium": "0 1px 2px rgb(40 34 28 / 0.06), 0 8px 24px -12px rgb(40 34 28 / 0.18)",
+        "high": "0 2px 6px rgb(40 34 28 / 0.05), 0 24px 48px -24px rgb(40 34 28 / 0.28)"
       },
-      "depth_cues": "overlapping layers, sombra de contacto bajo el producto, piezas flotando a distinta altura"
+      "depth_cues": "sombra de contacto bajo el producto, piezas flotando a distinta altura, paneles apenas despegados del fondo"
     },
     "iconography": {
-      "style": "glifos llenos y simples, más señal que ilustración (+, -, flechas, lupa)",
-      "stroke_weight": "bold",
+      "style": "trazo fino, geométrico",
+      "stroke_weight": "regular (bold solo en + y −)",
       "size_scale": [
+        "14px",
         "16px",
-        "20px",
-        "24px",
-        "32px"
+        "18px"
       ],
-      "preferred_set": "@phosphor-icons/react en peso bold"
+      "preferred_set": "@phosphor-icons/react"
     },
     "motion": {
-      "easing": "cubic-bezier(0.34, 1.56, 0.64, 1) para encastres con rebote; cubic-bezier(0.16, 1, 0.3, 1) para viajes de cámara y entradas",
+      "easing": "cubic-bezier(0.16, 1, 0.3, 1) para interfaz y viajes de cámara; resorte con rebote leve solo en el encastre de capas",
       "duration_scale": {
-        "micro": "140ms",
+        "micro": "150ms",
         "normal": "320ms",
-        "macro": "900ms"
+        "macro": "550ms (viaje de cámara)"
       },
-      "entrance_pattern": "las piezas caen desde arriba y rebotan al apoyarse sobre la anterior",
-      "exit_pattern": "la pieza se eleva y queda flotando con balanceo leve",
-      "philosophy": "playful bouncy"
+      "entrance_pattern": "fundido con subida corta de 8 a 12px",
+      "exit_pattern": "fundido",
+      "philosophy": "minimal functional; el movimiento expresivo es del producto (capas, giro final), no de la interfaz"
     },
     "components": {
-      "button_style": "CTA en cinta turquesa (#067f7c, sombra de #07a7a4 para texto blanco AA) con extremos cortados en diagonal, texto en mayúsculas condensadas y una franja inferior desplazada con degradé mostaza a rojo",
-      "input_style": "campo blanco de esquinas vivas con borde gris 1px, etiqueta condensada arriba; selector desplegable como el 'Other' de ref-1 con icono de menú a la izquierda y flecha a la derecha",
-      "card_style": "póster vertical a sangre con fondo de color pleno, título en mayúsculas gruesas centrado, autor en itálica, producto abajo; sin radio ni borde",
-      "navigation_pattern": "barra ciruela de 56px, enlaces en mayúsculas condensadas a ambos lados de una insignia circular mostaza que cuelga por debajo de la barra",
-      "modal_style": "hoja blanca de esquinas vivas con encabezado ciruela, sobre velo ciruela translúcido",
-      "list_style": "carrusel horizontal de ingredientes con nombre debajo y elemento central destacado; resumen como lista en dos columnas",
-      "component_notes": "Pestañas de categoría tipo etiqueta de color pleno pegadas al borde superior del póster (mostaza, turquesa, rojo). El '+' turquesa va arriba del carrusel y el '-' rojo abajo."
+      "button_style": "Píldoras. Primario en acento para la acción principal (Encastrar, Encargar). Secundario: superficie con borde. Silencioso: relleno neutro. Nunca dos primarios a la vista.",
+      "input_style": "Campo de 44px, radio 12px, borde neutro, foco en acento con halo suave, error en #b8322a debajo del campo",
+      "card_style": "Tarjeta de galería: superficie clara, radio 16px, borde de 1px y sombra suave, con un mini estudio (el mismo degradé del configurador) y la vista del teclado inclinada",
+      "navigation_pattern": "Header de 56px sin fondo propio: marca a la izquierda, control segmentado en el centro para cambiar de vista con transición, sonido a la derecha",
+      "modal_style": "Hoja centrada, radio 16px, sin encabezado de color, velo neutro",
+      "list_style": "Carrusel horizontal de muestras neutras con la elegida marcada por un borde de tinta; resumen como lista con separadores finos",
+      "component_notes": "El indicador de pasos es un control en píldora arriba del modelo; el panel del paso flota abajo con − a la izquierda del carrusel y + Encastrar a la derecha."
     }
   },
   "design_style": {
     "aesthetic": {
       "mood": [
-        "apetitoso",
-        "lúdico",
-        "artesanal",
-        "confiado"
+        "sereno",
+        "preciso",
+        "táctil",
+        "luminoso"
       ],
-      "visual_metaphor": "armar algo propio apilando capas sobre una mesa de trabajo",
-      "era_influence": "retail digital de campaña de los 2010s con producto fotográfico y tipografía de cartel",
-      "genre": "configurador de producto de consumo con galería comunitaria",
+      "visual_metaphor": "una mesa de estudio fotográfico donde se arma el producto",
+      "era_influence": "catálogos de producto contemporáneos",
+      "genre": "configurador de producto premium",
       "personality_traits": [
-        "generoso",
-        "directo",
-        "juguetón",
-        "prolijo"
+        "prolijo",
+        "seguro",
+        "discreto"
       ],
       "adjectives": [
-        "táctil",
+        "limpio",
         "cálido",
-        "colorido",
-        "ordenado"
+        "mate",
+        "silencioso"
       ]
     },
     "visual_language": {
-      "complexity": "moderate",
-      "ornamentation": "subtle accents",
-      "whitespace_usage": "aire alrededor del producto, bandas compactas para controles",
-      "visual_weight_distribution": "el producto pesa en el centro; color fuerte solo en la barra, las cintas y el bloque de galería",
+      "complexity": "minimal",
+      "ornamentation": "none",
+      "whitespace_usage": "generoso alrededor del modelo; la interfaz se compacta en los bordes",
+      "visual_weight_distribution": "todo el peso en el teclado; la interfaz es liviana y neutra",
       "focal_strategy": "single hero element",
-      "contrast_level": "alto entre bloques, medio dentro del configurador",
-      "texture_usage": "rombos grises muy suaves en el fondo claro, veta de madera bajo el producto, tela gris en el pie"
+      "contrast_level": "medio en la interfaz, alto en el producto",
+      "texture_usage": "ninguna textura; solo el degradé del fondo y la sombra de contacto"
     },
     "composition": {
-      "hierarchy_method": "scale contrast",
+      "hierarchy_method": "spatial isolation",
       "balance_type": "symmetric",
-      "flow_direction": "de arriba hacia abajo: instrucción, pieza flotante, carrusel, pila armada, CTA",
-      "grouping_strategy": "bandas horizontales de ancho completo",
-      "negative_space_role": "aísla al producto como protagonista"
+      "flow_direction": "pasos arriba, modelo al centro, opciones abajo",
+      "grouping_strategy": "paneles flotantes con radio suave",
+      "negative_space_role": "aísla al teclado como en una foto de catálogo"
     },
     "imagery": {
-      "photo_treatment": "producto recortado con iluminación de estudio y sombra de contacto, color saturado y apetitoso",
-      "illustration_style": "ninguna ilustración; solo producto y tipografía",
-      "graphic_elements": "cintas con extremos cortados, insignia circular, pestañas de color",
-      "pattern_usage": "patrón de rombos (arlequín) en grises casi blancos",
-      "image_shape": "recorte libre del producto, pósters rectangulares a sangre"
+      "photo_treatment": "render de estudio: luz suave de softbox, materiales físicos creíbles, sombra de contacto",
+      "illustration_style": "ninguna; las muestras se generan desde los datos del producto",
+      "graphic_elements": "ninguno decorativo",
+      "pattern_usage": "ninguno",
+      "image_shape": "producto recortado sobre el estudio; mini estudios rectangulares redondeados en la galería"
     },
     "interaction_feel": {
-      "feedback_style": "físico: cada elección se ve aplicada en el producto al instante",
-      "hover_behavior": "la cinta se desplaza 1-2px y su franja inferior se corre; los pósters acercan el producto",
-      "transition_personality": "bouncy elastic",
-      "loading_style": "silueta del producto en gris mientras carga",
-      "microinteraction_density": "medium"
+      "feedback_style": "físico: cada elección se ve en el modelo al instante",
+      "hover_behavior": "superficies que se aclaran apenas; en la galería el teclado se endereza y se acerca",
+      "transition_personality": "smooth glide",
+      "loading_style": "silueta del teclado en neutros con un brillo que la recorre y una barra fina",
+      "microinteraction_density": "low"
     },
     "brand_voice_in_ui": {
-      "tone": "cercano y entusiasta, instrucciones cortas en segunda persona",
-      "formality": "informal (voseo rioplatense)",
+      "tone": "cercano y breve, voseo rioplatense",
+      "formality": "informal",
       "cta_style": "direct imperative",
-      "empty_state_approach": "invita a la acción concreta que llena el vacío",
-      "error_tone": "simple y amable, dice qué hacer"
+      "empty_state_approach": "dice qué hacer a continuación",
+      "error_tone": "simple y amable, explica cómo corregir"
     }
   },
   "visual_effects": {
     "overview": {
-      "effect_intensity": "moderate",
+      "effect_intensity": "subtle-accent",
       "performance_tier": "heavy",
-      "fallback_strategy": "con prefers-reduced-motion se apagan la rotación automática, el balanceo y los viajes largos de cámara; las piezas se reubican sin rebote",
+      "fallback_strategy": "frameloop bajo demanda; PerformanceMonitor baja el pixel ratio y pasa a calidad baja (sin transmisión, sombras a 256 px) si caen los FPS; mobile arranca en calidad baja; con prefers-reduced-motion no hay autorrotación, viajes de cámara, giro ni balanceo; sin WebGL se muestra la vista plana",
       "primary_technology": "WebGL/Three.js (React Three Fiber)"
     },
     "background_effects": {
-      "type": "pattern-fill",
-      "description": "Patrón de rombos estático en grises casi blancos detrás del producto, con algunos rombos rellenos un tono más oscuro",
-      "technology": "SVG pattern",
+      "type": "gradient-animation",
+      "description": "Degradé radial estático de gris cálido casi blanco a un tono apenas más hondo hacia los bordes. No se anima.",
+      "technology": "CSS",
       "params": {
         "color_palette": [
-          "#f5f5f5",
-          "#ececec",
-          "#e6e6e6"
+          "#f3f1ee",
+          "#e8e4df"
         ],
         "speed": "estático",
-        "density": "rombos de 120px",
+        "density": "un solo degradé",
         "opacity": "1",
         "blend_mode": "normal"
       }
@@ -432,7 +283,7 @@
     "particle_systems": {
       "enabled": false,
       "type": "none",
-      "description": "Las referencias no muestran partículas",
+      "description": "Sin partículas",
       "technology": "none",
       "params": {
         "count": "0",
@@ -447,29 +298,30 @@
     "3d_elements": {
       "enabled": true,
       "type": "product-viewer",
-      "description": "Producto despiezado en capas que flotan separadas verticalmente con balanceo leve (ref-3) y se apilan de abajo hacia arriba sobre una mesa de madera (ref-1)",
+      "description": "Teclado despiezado en capas que flotan y se encastran de abajo hacia arriba sobre una superficie mate de estudio",
       "technology": "Three.js vía @react-three/fiber + drei",
       "params": {
-        "renderer": "WebGL2, antialias, tone mapping ACES, fondo transparente sobre el patrón CSS",
-        "lighting": "Environment de estudio + luz direccional cálida desde arriba a la izquierda + spot que marca la capa activa",
-        "camera": "perspectiva 35mm, tres cuartos desde arriba, viaja según la capa activa",
-        "materials": "aluminio anodizado (metalness alto, rugosidad media), PBT mate, resina y policarbonato translúcidos con transmisión, madera mate",
-        "geometry": "cajas redondeadas biseladas, teclas esculpidas por fila, tubo helicoidal para el cable",
+        "renderer": "WebGL2, fondo transparente sobre el degradé CSS, frameloop bajo demanda, pixel ratio adaptativo",
+        "lighting": "Environment con Lightformers neutros (softbox superior, laterales, aro frontal), direccional blanca y spot sobre la capa activa",
+        "camera": "perspectiva 32°, encuadre calculado para que la pila entre completa en la zona libre de interfaz; zoom con rueda limitado a ±20%",
+        "materials": "aluminio anodizado satinado, PBT mate con color por instancia, resina y policarbonato con transmisión (opacidad en calidad baja), superficie mate de estudio",
+        "geometry": "teclas esculpidas instanciadas por ancho y fila, switches instanciados, leyendas en un atlas único",
         "post_processing": [
-          "bloom (solo en la retroiluminación)"
+          "bloom solo con la retroiluminación prendida",
+          "tone mapping ACES"
         ],
-        "interaction_model": "arrastrar para rotar, rueda para zoom con límites, inclinación que sigue al mouse, autorrotación lenta en reposo"
+        "interaction_model": "arrastrar para rotar, rueda para un zoom corto, inclinación que sigue al mouse, autorrotación lenta en reposo hasta que la escena se duerme"
       }
     },
     "shader_effects": {
       "enabled": false,
       "type": "none",
-      "description": "Sin shaders propios; los materiales físicos estándar alcanzan",
-      "technology": "none",
+      "description": "Solo una extensión mínima del material de leyendas para leer su celda del atlas por instancia",
+      "technology": "onBeforeCompile",
       "params": {
         "uniforms": "none",
-        "vertex_manipulation": "none",
-        "fragment_output": "none",
+        "vertex_manipulation": "desplazamiento de UV por instancia",
+        "fragment_output": "estándar",
         "noise_type": "none",
         "distortion": "none"
       }
@@ -482,25 +334,23 @@
         "speed_curve": "none"
       },
       "scroll_triggered_animations": {
-        "enabled": true,
-        "trigger_points": [
-          "entrada de la galería al viewport"
-        ],
-        "animation_type": "fade-up",
-        "scrub_behavior": "triggered"
+        "enabled": false,
+        "trigger_points": [],
+        "animation_type": "none",
+        "scrub_behavior": "none"
       },
       "scroll_morphing": {
         "enabled": false,
-        "description": "No presente en las referencias"
+        "description": "La página no scrollea: las vistas cambian con un fundido corto"
       }
     },
     "text_effects": {
       "type": "split-letter-animate",
-      "description": "El título de cada paso entra palabra por palabra al cambiar de capa",
+      "description": "El título de cada paso entra palabra por palabra",
       "technology": "Motion",
       "params": {
         "split_strategy": "by-word",
-        "animation_per_unit": "sube 12px y aparece",
+        "animation_per_unit": "sube 14px y aparece",
         "stagger": "50ms",
         "effect_style": "slide"
       }
@@ -508,7 +358,7 @@
     "cursor_effects": {
       "enabled": false,
       "type": "none",
-      "description": "Cursor nativo; solo el producto 3D reacciona al puntero con inclinación",
+      "description": "Cursor nativo",
       "params": {
         "shape": "none",
         "size": "none",
@@ -519,12 +369,12 @@
     },
     "image_effects": {
       "type": "parallax-tilt",
-      "description": "En los pósters de la galería el producto se acerca y se inclina levemente al pasar el mouse",
-      "technology": "CSS transform + Motion",
+      "description": "En la galería la mini vista del teclado se endereza y se acerca al pasar el mouse",
+      "technology": "CSS transform",
       "params": {
         "filter_pipeline": "none",
-        "hover_transform": "scale(1.04) translateY(-4px)",
-        "reveal_animation": "fade-up al entrar",
+        "hover_transform": "rotateX(26deg) scale(1.04)",
+        "reveal_animation": "fundido con subida corta",
         "distortion_type": "none"
       }
     },
@@ -542,24 +392,22 @@
     "canvas_drawings": {
       "enabled": true,
       "type": "pattern-fill",
-      "description": "Textura de veta de madera generada en canvas 2D para la mesa bajo el producto",
+      "description": "Atlas de leyendas de teclas y grabado de la barra espaciadora dibujado en canvas 2D con Geist",
       "technology": "Canvas 2D a CanvasTexture",
       "params": {
-        "draw_method": "franjas con ruido senoidal y nudos",
-        "animation_loop": "ninguno (se dibuja una vez)",
+        "draw_method": "una celda de 128 px por tecla y una franja para el grabado",
+        "animation_loop": "ninguno; se redibuja al cambiar juego de teclas, formato o grabado",
         "color_scheme": [
-          "#e1ceab",
-          "#b09672",
-          "#794f27"
+          "colores de leyenda de cada juego"
         ],
-        "responsiveness": "textura fija repetida",
+        "responsiveness": "textura fija",
         "interaction": "none"
       }
     },
     "svg_animations": {
       "enabled": false,
       "type": "none",
-      "description": "No presente en las referencias",
+      "description": "Las muestras del carrusel y la galería son SVG estáticos generados desde los datos",
       "params": {
         "animation_method": "none",
         "path_morphing": "none",
@@ -567,6 +415,6 @@
         "filter_effects": "none"
       }
     },
-    "composite_notes": "El fondo claro con rombos es CSS/SVG y el lienzo WebGL es transparente encima, así el producto parece apoyado en la página como en ref-1. La pila flotante y el balanceo vienen de ref-3, pero sobre fondo claro: el casi negro de ref-3 queda solo como tono de sombra y de texto fuerte. La galería toma el bloque ciruela de ref-2 como único cambio de color de la página. El cian #17cdf3 de ref-3 (0,46% de cobertura) se descarta a propósito para no caer en fondo oscuro con acento cian. Verificación: las capturas del configurador y de la galería se miden por separado contra ref-1 y ref-2 respectivamente; ref-3 aporta composición (pila flotante), no paleta de interfaz. Resultado de verify.mjs (k=8): configurador contra ref-1 recortada, ΔE medio 2,97 y deriva de cobertura 0,17 (dentro de umbral); galería contra la mitad VOTE de ref-2, ΔE medio 3,15 y deriva 0,29 (dentro de umbral). En ambos el ΔE máximo supera 20 solo por colores propios de la foto de hamburguesa (tomate #c03d1b, lechuga #7f691f y #58980e, cada uno 1-3% de cobertura) que no tienen equivalente en un teclado y se dejan fuera a propósito."
+    "composite_notes": "El lienzo WebGL es transparente sobre el degradé CSS, así el estudio continúa sin cortes detrás de la interfaz. La superficie mate es un plano con máscara radial; con la retroiluminación prendida (Bloom) se oculta y queda solo la sombra de contacto, porque el compositor no respeta su alfa. De la primera dirección (ciruela, turquesa, mostaza, rombos, madera, cintas, tipografía condensada) no queda nada. Esta dirección no viene de capturas medidas sino del brief, por eso no hay paleta medida ni verificación con verify.mjs."
   }
 }

@@ -98,10 +98,12 @@ export class LayoutAnimator {
     this.frame.t = dims
   }
 
-  update(delta: number, instant: boolean) {
+  /** Avanza la animación; devuelve true mientras algo siga moviéndose. */
+  update(delta: number, instant: boolean): boolean {
     const dt = Math.min(delta, 1 / 20)
     const smooth = instant ? 0.0001 : 0.22
     let index = 0
+    let moving = false
     for (const [id, state] of this.keys) {
       const down = isPressed(id)
       // baja rápido y vuelve un poco más lento, como un resorte real
@@ -112,6 +114,16 @@ export class LayoutAnimator {
       easing.damp(state, "z", state.tz, stagger, dt)
       easing.damp(state, "w", state.tw, stagger, dt)
       easing.damp(state, "s", state.ts, instant ? smooth : 0.14, dt)
+      if (
+        Math.abs(state.x - state.tx) > 1e-4 ||
+        Math.abs(state.z - state.tz) > 1e-4 ||
+        Math.abs(state.w - state.tw) > 1e-4 ||
+        Math.abs(state.s - state.ts) > 1e-4 ||
+        state.p > 1e-3 ||
+        down
+      ) {
+        moving = true
+      }
       index++
     }
     const f = this.frame
@@ -120,5 +132,7 @@ export class LayoutAnimator {
     easing.damp(f, "caseW", f.t.caseW, smooth, dt)
     easing.damp(f, "caseD", f.t.caseD, smooth, dt)
     easing.damp(f, "caseZ", f.t.caseZ, smooth, dt)
+    if (Math.abs(f.caseW - f.t.caseW) > 1e-4 || Math.abs(f.caseD - f.t.caseD) > 1e-4) moving = true
+    return moving
   }
 }

@@ -1,42 +1,22 @@
 import { useEffect, useMemo, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
-import { RoundedBox, Text } from "@react-three/drei"
+import { RoundedBox } from "@react-three/drei"
 import * as THREE from "three"
-import legendFont from "@fontsource/barlow-condensed/files/barlow-condensed-latin-600-normal.woff?url"
 
 import { playComplete, playSnap } from "@/audio/sounds"
-import { ENGRAVING_MAX, knobColor, type Config } from "@/data/catalog"
-import { ALL_KEY_IDS, ARROW_ANGLE, DEMO_KEY_ID, LAYOUTS, type KeyDef } from "@/data/layouts"
+import { knobColor, type Config } from "@/data/catalog"
+import { DEMO_KEY_ID, LAYOUTS } from "@/data/layouts"
 import { LAYER_COUNT, useConfigurator } from "@/store/configurator"
 import { pressKey, releaseKey } from "@/store/keyPresses"
 
-import {
-  ACTIVE_FORWARD,
-  CASE_WALL_TOP,
-  KEY_GAP,
-  KEYCAP_BASE,
-  PLATE_THICKNESS,
-  PLATE_Y,
-  PRESS_DEPTH,
-  PROFILE,
-  STEM_H,
-  SWITCH_BASE,
-  SWITCH_HOUSING_H,
-  TILT,
-  U,
-  layerOffsetY,
-} from "./constants"
-import { cableCurve, caseGeometry, keycapGeometry, keycapTop, knobGeometry } from "./geometry"
+import { isAwake } from "./activity"
+import { ACTIVE_FORWARD, CASE_WALL_TOP, PLATE_THICKNESS, PLATE_Y, SWITCH_BASE, TILT, U, layerOffsetY } from "./constants"
+import { cableCurve, caseGeometry, knobGeometry } from "./geometry"
+import { KeycapLayer } from "./KeycapLayer"
+import { LEGEND_FONT } from "./legendAtlas"
 import { caseDims, type LayoutAnimator } from "./layoutAnimator"
-import {
-  useCableMaterial,
-  useCaseMaterial,
-  useKeycapMaterials,
-  useKnobMaterial,
-  usePlateMaterial,
-  useSwitchMaterials,
-  type KeycapMaterials,
-} from "./materials"
+import { useCableMaterial, useCaseMaterial, useKnobMaterial, usePlateMaterial } from "./materials"
+import { SwitchLayer } from "./SwitchLayer"
 
 interface LayerSpring {
   y: number
@@ -132,12 +112,16 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
     }
   }, [demoPress])
 
-  useFrame((_, delta) => animator.update(delta, reduced), -1)
+  useFrame((state, delta) => {
+    if (animator.update(delta, reduced)) state.invalidate()
+  }, -1)
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 1 / 30)
     const time = state.clock.elapsedTime
     const f = animator.frame
+    const awake = isAwake()
+    let moving = false
 
     // pivote en el borde delantero inferior para la inclinación de escritura
     const front = f.caseZ + f.caseD / 2
@@ -152,13 +136,16 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
       const follow = reduced || spin.current.active ? 0 : 1
       const rx = p ? p.y * -0.07 * follow : 0
       const ry = p ? p.x * 0.16 * follow : 0
-      rootRef.current.rotation.x = THREE.MathUtils.damp(rootRef.current.rotation.x, rx, 3, dt)
-      rootRef.current.rotation.y = THREE.MathUtils.damp(rootRef.current.rotation.y, ry, 3, dt)
+      const r = rootRef.current.rotation
+      r.x = THREE.MathUtils.damp(r.x, rx, 3, dt)
+      r.y = THREE.MathUtils.damp(r.y, ry, 3, dt)
+      if (Math.abs(r.x - rx) > 1e-4 || Math.abs(r.y - ry) > 1e-4) moving = true
     }
 
     // giro final
     if (spinRef.current) {
       if (spin.current.active) {
+        moving = true
         spin.current.t += Math.min(delta, 0.1) / 2.1
         const t = Math.min(spin.current.t, 1)
         const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
@@ -197,7 +184,19 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
         }
       }
       sp.s = THREE.MathUtils.damp(sp.s, targetS, 6, dt)
-      sp.bob = THREE.MathUtils.damp(sp.bob, i >= placed && !reduced ? 1 : 0, 4, dt)
+      // el balanceo corre mientras la escena está despierta y después se aquieta
+      sp.bob = THREE.MathUtils.damp(sp.bob, i >= placed && !reduced && awake ? 1 : 0, 2, dt)
+      if (sp.bob < 1e-3) sp.bob = 0
+      if (
+        sp.bob > 0 ||
+        Math.abs(sp.y - targetY) > 1e-4 ||
+        Math.abs(sp.vy) > 1e-4 ||
+        Math.abs(sp.z - targetZ) > 1e-4 ||
+        Math.abs(sp.vz) > 1e-4 ||
+        Math.abs(sp.s - targetS) > 1e-4
+      ) {
+        moving = true
+      }
 
       const bobY = Math.sin(time * 1.15 + i * 1.4) * 0.03 * sp.bob
       group.position.set(0, sp.y + bobY, sp.z)
@@ -205,6 +204,8 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
       group.rotation.x = Math.cos(time * 0.7 + i * 1.7) * 0.01 * sp.bob
       group.scale.setScalar(sp.s)
     }
+
+    if (moving) state.invalidate()
   })
 
   const layout = LAYOUTS[config.format]
@@ -224,7 +225,7 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
               <SwitchLayer config={config} animator={animator} />
             </group>
             <group ref={(el) => void (layerRefs.current[3] = el)} name="capa-teclas">
-              <KeycapLayer config={config} animator={animator} layoutKeys={layout.keys} />
+              <KeycapLayer config={config} animator={animator} layout={layout} />
             </group>
             <group ref={(el) => void (layerRefs.current[4] = el)} name="capa-detalles">
               <KnobDetail config={config} reduced={reduced} />
@@ -277,22 +278,32 @@ function CaseLayer({ config, animator }: { config: Config; animator: LayoutAnima
 /** Marca de la casa grabada en el bisel trasero (60% y TKL). */
 function BadgeEngraving({ config, target }: { config: Config; target: ReturnType<typeof caseDims> }) {
   const layout = LAYOUTS[config.format]
+  const texture = useMemo(() => {
+    const canvas = document.createElement("canvas")
+    canvas.width = 512
+    canvas.height = 128
+    const ctx = canvas.getContext("2d")!
+    ctx.fillStyle = "#ffffff"
+    ctx.textBaseline = "middle"
+    ctx.font = `600 72px ${LEGEND_FONT}`
+    ctx.letterSpacing = "18px"
+    ctx.fillText("PULSA", 8, 68)
+    const t = new THREE.CanvasTexture(canvas)
+    t.colorSpace = THREE.SRGBColorSpace
+    return t
+  }, [])
+  useEffect(() => () => texture.dispose(), [texture])
   if (layout.bezel.top < 1) return null
   const z = -target.caseD / 2 + (layout.bezel.top * U) / 2
+  const w = 0.42
   return (
-    <Text
-      font={legendFont}
-      fontSize={0.075}
-      letterSpacing={0.18}
-      color="#ffffff"
-      fillOpacity={0.28}
-      anchorX="left"
-      anchorY="middle"
-      position={[-target.caseW / 2 + layout.bezel.side * U + 0.02, CASE_WALL_TOP + 0.0015, z]}
+    <mesh
+      position={[-target.caseW / 2 + layout.bezel.side * U + 0.02 + w / 2, CASE_WALL_TOP + 0.0015, z]}
       rotation={[-Math.PI / 2, 0, 0]}
     >
-      PULSA
-    </Text>
+      <planeGeometry args={[w, w / 4]} />
+      <meshBasicMaterial map={texture} transparent opacity={0.3} depthWrite={false} />
+    </mesh>
   )
 }
 
@@ -324,222 +335,6 @@ function PlateLayer({ config, animator }: { config: Config; animator: LayoutAnim
   )
 }
 
-// ---------- capa 3: switches y LEDs ----------
-
-const SWITCH_COUNT = ALL_KEY_IDS.length
-
-function SwitchLayer({ config, animator }: { config: Config; animator: LayoutAnimator }) {
-  const [housingMat, stemMat] = useSwitchMaterials(config)
-  const housingRef = useRef<THREE.InstancedMesh>(null)
-  const stemARef = useRef<THREE.InstancedMesh>(null)
-  const stemBRef = useRef<THREE.InstancedMesh>(null)
-  const ledRef = useRef<THREE.InstancedMesh>(null)
-
-  const housingGeo = useMemo(() => {
-    const g = new THREE.BoxGeometry(0.14, SWITCH_HOUSING_H, 0.14)
-    g.translate(0, SWITCH_HOUSING_H / 2, 0)
-    return g
-  }, [])
-  const stemAGeo = useMemo(() => {
-    const g = new THREE.BoxGeometry(0.045, STEM_H, 0.012)
-    g.translate(0, STEM_H / 2, 0)
-    return g
-  }, [])
-  const stemBGeo = useMemo(() => {
-    const g = new THREE.BoxGeometry(0.012, STEM_H, 0.045)
-    g.translate(0, STEM_H / 2, 0)
-    return g
-  }, [])
-  const ledGeo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(1, 1)
-    g.rotateX(-Math.PI / 2)
-    return g
-  }, [])
-  const ledMat = useMemo(() => new THREE.MeshBasicMaterial({ toneMapped: false, color: "#ffffff" }), [])
-
-  useEffect(
-    () => () => {
-      housingGeo.dispose()
-      stemAGeo.dispose()
-      stemBGeo.dispose()
-      ledGeo.dispose()
-      ledMat.dispose()
-    },
-    [housingGeo, stemAGeo, stemBGeo, ledGeo, ledMat]
-  )
-
-  const m = useMemo(() => new THREE.Matrix4(), [])
-  const q = useMemo(() => new THREE.Quaternion(), [])
-  const pos = useMemo(() => new THREE.Vector3(), [])
-  const scl = useMemo(() => new THREE.Vector3(), [])
-  const col = useMemo(() => new THREE.Color(), [])
-  const base = useMemo(() => new THREE.Color(), [])
-  const hsl = useMemo(() => ({ h: 0, s: 0, l: 0 }), [])
-
-  useFrame((state) => {
-    const housing = housingRef.current
-    const stemA = stemARef.current
-    const stemB = stemBRef.current
-    const led = ledRef.current
-    if (!housing || !stemA || !stemB || !led) return
-    const time = state.clock.elapsedTime
-    const mode = config.rgbMode
-    led.visible = mode !== "apagada"
-    base.set(config.rgbColor)
-    base.getHSL(hsl)
-
-    let i = 0
-    for (const key of animator.keys.values()) {
-      const s = key.s
-      pos.set(key.x, SWITCH_BASE, key.z)
-      scl.set(s, s, s)
-      m.compose(pos, q, scl)
-      housing.setMatrixAt(i, m)
-
-      pos.set(key.x, SWITCH_BASE + SWITCH_HOUSING_H - key.p * PRESS_DEPTH * 0.8, key.z)
-      m.compose(pos, q, scl)
-      stemA.setMatrixAt(i, m)
-      stemB.setMatrixAt(i, m)
-
-      pos.set(key.x, PLATE_Y + PLATE_THICKNESS / 2 + 0.003, key.z)
-      scl.set(Math.max(0.0001, (key.w * U - KEY_GAP * 0.5) * s), 1, Math.max(0.0001, (U - KEY_GAP * 0.5) * s))
-      m.compose(pos, q, scl)
-      led.setMatrixAt(i, m)
-
-      if (mode === "fija") {
-        col.copy(base).multiplyScalar(2.6)
-      } else if (mode === "ola") {
-        const wave = Math.sin(key.x * 3.2 - time * 2.6 + key.z * 1.4)
-        col.setHSL((hsl.h + wave * 0.07 + 1) % 1, Math.min(1, hsl.s + 0.05), hsl.l)
-        col.multiplyScalar(1.7 + (wave + 1) * 1.1)
-      } else {
-        col.setRGB(0, 0, 0)
-      }
-      // si una tecla se presiona, su LED se aviva
-      col.multiplyScalar(1 + key.p * 0.8)
-      led.setColorAt(i, col)
-      i++
-    }
-    housing.instanceMatrix.needsUpdate = true
-    stemA.instanceMatrix.needsUpdate = true
-    stemB.instanceMatrix.needsUpdate = true
-    led.instanceMatrix.needsUpdate = true
-    if (led.instanceColor) led.instanceColor.needsUpdate = true
-  })
-
-  return (
-    <group>
-      <instancedMesh ref={housingRef} args={[housingGeo, housingMat, SWITCH_COUNT]} castShadow frustumCulled={false} />
-      <instancedMesh ref={stemARef} args={[stemAGeo, stemMat, SWITCH_COUNT]} frustumCulled={false} />
-      <instancedMesh ref={stemBRef} args={[stemBGeo, stemMat, SWITCH_COUNT]} frustumCulled={false} />
-      <instancedMesh ref={ledRef} args={[ledGeo, ledMat, SWITCH_COUNT]} frustumCulled={false} />
-    </group>
-  )
-}
-
-// ---------- capa 4: teclas ----------
-
-function KeycapLayer({
-  config,
-  animator,
-  layoutKeys,
-}: {
-  config: Config
-  animator: LayoutAnimator
-  layoutKeys: KeyDef[]
-}) {
-  const materials = useKeycapMaterials(config)
-  const current = useMemo(() => new Map(layoutKeys.map((k) => [k.id, k])), [layoutKeys])
-  return (
-    <group>
-      {ALL_KEY_IDS.map((id) => (
-        <Keycap
-          key={id}
-          id={id}
-          def={current.get(id) ?? animator.keys.get(id)!.def}
-          materials={materials}
-          animator={animator}
-          engraving={id === "space" ? config.engraving : ""}
-        />
-      ))}
-    </group>
-  )
-}
-
-interface KeycapProps {
-  id: string
-  def: KeyDef
-  materials: KeycapMaterials
-  animator: LayoutAnimator
-  engraving: string
-}
-
-function Keycap({ id, def, materials, animator, engraving }: KeycapProps) {
-  const ref = useRef<THREE.Group>(null)
-  const geometry = keycapGeometry(def.w, def.row)
-  const top = keycapTop(def.row)
-  const angle = PROFILE[def.row].angle
-  const kind = def.kind === "space" ? "alpha" : def.kind
-  const material = materials[kind]
-  const legendColor = materials.legend[kind]
-  const label = def.label
-  const fontSize = label.length <= 1 ? 0.058 : label.length <= 3 ? 0.04 : 0.033
-
-  useFrame(() => {
-    const g = ref.current
-    const state = animator.keys.get(id)
-    if (!g || !state) return
-    const s = state.s
-    g.visible = s > 0.01
-    g.position.set(state.x, KEYCAP_BASE - state.p * PRESS_DEPTH, state.z)
-    g.scale.set((state.w / def.w) * s, s, s)
-  })
-
-  return (
-    <group ref={ref}>
-      <mesh geometry={geometry} material={material} castShadow receiveShadow />
-      <group position={[0, top + 0.0015, 0]} rotation={[-Math.PI / 2 + angle, 0, 0]}>
-        {label ? (
-          <Text font={legendFont} fontSize={fontSize} color={legendColor} anchorX="center" anchorY="middle">
-            {label}
-          </Text>
-        ) : null}
-        {id in ARROW_ANGLE ? <ArrowGlyph color={legendColor} angle={ARROW_ANGLE[id]} /> : null}
-        {engraving ? (
-          <Text
-            font={legendFont}
-            fontSize={0.06}
-            letterSpacing={0.06}
-            maxWidth={def.w * U * 0.86}
-            color={legendColor}
-            anchorX="center"
-            anchorY="middle"
-          >
-            {engraving.slice(0, ENGRAVING_MAX).toUpperCase()}
-          </Text>
-        ) : null}
-      </group>
-    </group>
-  )
-}
-
-const arrowShape = (() => {
-  const s = new THREE.Shape()
-  s.moveTo(0, 0.026)
-  s.lineTo(0.022, -0.016)
-  s.lineTo(-0.022, -0.016)
-  s.closePath()
-  return new THREE.ShapeGeometry(s)
-})()
-
-function ArrowGlyph({ color, angle }: { color: string; angle: number }) {
-  return (
-    <mesh geometry={arrowShape} rotation={[0, 0, angle]}>
-      <meshBasicMaterial color={color} toneMapped={false} />
-    </mesh>
-  )
-}
-
 // ---------- capa 5: detalles ----------
 
 function KnobDetail({ config, reduced }: { config: Config; reduced: boolean }) {
@@ -557,7 +352,7 @@ function KnobDetail({ config, reduced }: { config: Config; reduced: boolean }) {
   const targetZ = (layout.knob.y - layout.depth / 2) * U
   const baseY = inSlot ? SWITCH_BASE : CASE_WALL_TOP
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const g = ref.current
     if (!g) return
     if (reduced) {
@@ -568,6 +363,7 @@ function KnobDetail({ config, reduced }: { config: Config; reduced: boolean }) {
     g.position.x = THREE.MathUtils.damp(g.position.x, targetX, 6, dt)
     g.position.z = THREE.MathUtils.damp(g.position.z, targetZ, 6, dt)
     g.position.y = THREE.MathUtils.damp(g.position.y, baseY, 6, dt)
+    if (g.position.distanceToSquared(new THREE.Vector3(targetX, baseY, targetZ)) > 1e-8) state.invalidate()
   })
 
   return (

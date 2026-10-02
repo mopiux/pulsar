@@ -8,11 +8,7 @@ import { pressKey, releaseAll, releaseKey } from "@/store/keyPresses"
 const SCROLL_KEYS = new Set(["Space", "ArrowUp", "ArrowDown", "PageUp", "PageDown"])
 
 function configuratorInView() {
-  const section = document.getElementById("configurador")
-  if (!section) return false
-  const rect = section.getBoundingClientRect()
-  const mid = window.innerHeight / 2
-  return rect.top < mid && rect.bottom > mid
+  return useConfigurator.getState().view === "configurador"
 }
 
 /** Mientras se completa el pedido, el teclado del modelo no reacciona. */
@@ -27,7 +23,7 @@ function inDialog(event: KeyboardEvent) {
 export function usePhysicalKeyboard() {
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
-      if (event.metaKey || inDialog(event)) return
+      if (event.metaKey || inDialog(event) || !configuratorInView()) return
       const id = keyIdForCode(event.code)
       if (!id) return
       // espacio y flechas no deben desplazar la página mientras se prueba el teclado

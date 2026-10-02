@@ -27,6 +27,7 @@ const EDIT_TARGET: Record<string, { step: number; stepId: StepId; sub: SubId }> 
 interface SummaryPanelProps {
   className?: string
   style?: React.CSSProperties
+  /** dentro del panel inferior de mobile: sin tarjeta propia */
   compact?: boolean
 }
 
@@ -51,76 +52,71 @@ export function SummaryPanel({ className, style, compact = false }: SummaryPanel
   return (
     <motion.aside
       aria-labelledby="resumen-titulo"
-      initial={reduce ? false : { opacity: 0, x: compact ? 0 : 40, y: compact ? 20 : 0 }}
+      initial={reduce ? false : { opacity: 0, x: compact ? 0 : 24, y: compact ? 12 : 0 }}
       animate={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ type: "spring", stiffness: 260, damping: 28 }}
-      className={cn("flex flex-col bg-card text-card-foreground shadow-high", className)}
+      transition={{ type: "spring", stiffness: 260, damping: 30 }}
+      className={cn(
+        "flex flex-col text-card-foreground",
+        !compact && "overflow-hidden rounded-2xl border bg-card shadow-float",
+        className
+      )}
       style={style}
     >
-      <header
-        className={cn(
-          "shrink-0 px-5",
-          compact ? "sr-only" : "bg-primary pt-4 pb-3 text-primary-foreground"
-        )}
-      >
-        <h2 id="resumen-titulo" className="font-display text-2xl font-bold uppercase">
-          Tu Pulsa
+      <header className={cn("shrink-0", compact ? "px-4 pb-1" : "px-5 pt-5 pb-2")}>
+        <h2 id="resumen-titulo" className="text-lg font-semibold tracking-tight">
+          Listo, es tuyo
         </h2>
-        <p className="text-sm text-primary-foreground/80">Armado a mano, sale del taller en 3 semanas.</p>
+        <p className="text-[13px] text-muted-foreground">Armado a mano en Buenos Aires, sale del taller en 3 semanas.</p>
       </header>
 
-      <ul className={cn("flex-1 overflow-y-auto px-5 py-2", compact && "grid grid-cols-2 gap-x-3 px-4")}>
+      <ul data-scroll className={cn("min-h-0 flex-1 overflow-y-auto", compact ? "grid grid-cols-2 gap-x-3 px-4" : "px-5")}>
         {lines.map((line) => (
-          <li key={line.label} className="group flex min-w-0 items-center gap-2 py-1">
+          <li key={line.label} className="group flex min-w-0 items-center gap-2 border-b py-2 last:border-b-0">
             <div className="min-w-0 flex-1">
-              <p className="font-display text-xs font-bold tracking-[0.1em] text-muted-foreground uppercase">
-                {line.label}
-              </p>
-              <p className="truncate text-sm text-foreground">{line.value}</p>
+              <p className="text-[11px] text-muted-foreground">{line.label}</p>
+              <p className="truncate text-sm">{line.value}</p>
             </div>
             {compact ? null : (
-              <span className="shrink-0 text-sm text-muted-foreground tabular-nums">
+              <span className="shrink-0 text-[13px] text-muted-foreground tabular-nums">
                 {line.label === "Formato" ? formatPrice(line.price) : formatDelta(line.price)}
               </span>
             )}
             <button
               type="button"
               onClick={() => edit(line.label)}
-              className="grid size-8 shrink-0 place-items-center text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/60"
+              className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/45"
               aria-label={`Editar ${line.label.toLowerCase()}`}
             >
-              <PencilSimple weight="bold" className="size-4" />
+              <PencilSimple className="size-4" />
             </button>
           </li>
         ))}
       </ul>
 
-      <div className="shrink-0 border-t px-5 pt-3 pb-5">
-        <div className="mb-4 flex items-baseline justify-between">
-          <span className="font-display text-sm font-bold tracking-[0.12em] uppercase">Total</span>
-          <NumberTicker value={totalPrice(config)} className="font-display text-3xl font-bold text-heading" />
+      <div className={cn("shrink-0", compact ? "px-4 pt-3" : "border-t px-5 pt-4 pb-5")}>
+        <div className="mb-3 flex items-baseline justify-between">
+          <span className="text-sm text-muted-foreground">Total</span>
+          <NumberTicker value={totalPrice(config)} className="text-2xl font-semibold tracking-tight" />
         </div>
-        <div className="flex flex-col gap-4">
-          <Button variant="ribbon" size="lg" className="w-full" onClick={() => setOrderOpen(true)}>
-            Encargar
+        <Button variant="primary" size="lg" className="w-full" onClick={() => setOrderOpen(true)}>
+          Encargar
+        </Button>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <Button variant="secondary" size="sm" onClick={share}>
+            <ShareNetwork />
+            Compartir
           </Button>
-          <div className="mt-1 grid grid-cols-2 gap-2">
-            <Button variant="outline" size="sm" onClick={share}>
-              <ShareNetwork weight="bold" />
-              Compartir
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                playLift()
-                explode()
-              }}
-            >
-              <ArrowsOutLineVertical weight="bold" />
-              Despiezar
-            </Button>
-          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              playLift()
+              explode()
+            }}
+          >
+            <ArrowsOutLineVertical />
+            Despiezar
+          </Button>
         </div>
       </div>
       <OrderDialog open={orderOpen} onOpenChange={setOrderOpen} />

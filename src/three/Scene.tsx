@@ -1,6 +1,6 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { ContactShadows, Environment, Lightformer } from "@react-three/drei"
+import { ContactShadows, Environment, Lightformer, PerformanceMonitor } from "@react-three/drei"
 import { Bloom, EffectComposer, ToneMapping } from "@react-three/postprocessing"
 import { ToneMappingMode } from "postprocessing"
 import * as THREE from "three"
@@ -8,83 +8,130 @@ import * as THREE from "three"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { LAYER_COUNT, activeStepIndex, useConfigurator } from "@/store/configurator"
 
-import { ACTIVE_FORWARD, LAYER_FOCUS_Y, layerOffsetY } from "./constants"
+import { bindInvalidate, wake } from "./activity"
 import { CameraRig, type Cover } from "./CameraRig"
+import { ACTIVE_FORWARD, LAYER_FOCUS_Y, layerOffsetY } from "./constants"
 import { Keyboard } from "./Keyboard"
 import { LayoutAnimator } from "./layoutAnimator"
-import { createFadeTexture, createWoodTexture } from "./woodTexture"
+import { QualityContext, type QualityTier } from "./quality"
 
 export interface SceneProps {
   reduced: boolean
+  /** la vista del configurador está en pantalla */
+  visible: boolean
   /** píxeles tapados por la interfaz en cada borde del lienzo */
   cover: Cover
   onReady: () => void
   fallback: React.ReactNode
 }
 
-export function Scene({ reduced, cover, onReady, fallback }: SceneProps) {
+export default function Scene({ reduced, visible, cover, onReady, fallback }: SceneProps) {
   const [animator] = useState(() => new LayoutAnimator(useConfigurator.getState().config.format))
   const pointer = useRef(new THREE.Vector2())
   const rgbOn = useConfigurator((s) => s.config.rgbMode !== "apagada")
+  const mobile = useMediaQuery("(max-width: 1023px), (pointer: coarse)")
+  const dark = useMediaQuery("(prefers-color-scheme: dark)")
+
+  // calidad adaptativa: mobile arranca en baja; si caen los FPS se baja el
+  // pixel ratio y, si no alcanza, se pasa a calidad baja
+  const maxDpr = Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio, mobile ? 1.5 : 2)
+  const [dpr, setDpr] = useState(() => Math.min(maxDpr, mobile ? 1.25 : 1.75))
+  const [tier, setTier] = useState<QualityTier>(mobile ? "low" : "high")
 
   useEffect(() => {
+    if (!visible) return
     const onMove = (event: PointerEvent) => {
       pointer.current.set((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1)
+      wake()
     }
     window.addEventListener("pointermove", onMove, { passive: true })
+    wake()
     return () => window.removeEventListener("pointermove", onMove)
-  }, [])
+  }, [visible])
 
   return (
     <Canvas
-      dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+      frameloop={visible ? "demand" : "never"}
+      dpr={dpr}
+      gl={{ antialias: !mobile, alpha: true, powerPreference: "high-performance" }}
       camera={{ fov: 32, position: [0, 3, 7], near: 0.1, far: 60 }}
       fallback={fallback}
+      onCreated={({ gl }) => {
+        // la transmisión de resina y policarbonato se calcula a menor resolución
+        gl.transmissionResolutionScale = mobile ? 0.5 : 0.75
+      }}
       aria-label="Modelo 3D del teclado. Arrastrá para rotar y usá la rueda para acercarte."
       role="img"
+      style={{ touchAction: "none" }}
     >
-      <ViewShift x={(cover.right - cover.left) / 2} y={(cover.bottom - cover.top) / 2} />
-      <ambientLight intensity={0.35} />
-      <directionalLight position={[3, 6, 4]} intensity={1.6} color="#fff4e6" />
-      <directionalLight position={[-4, 3, -3]} intensity={0.5} color="#e6f0ff" />
-      <ActiveLayerLight reduced={reduced} />
+      <PerformanceMonitor
+        flipflops={3}
+        onIncline={() => setDpr((d) => Math.min(maxDpr, d + 0.25))}
+        onDecline={() => setDpr((d) => Math.max(1, d - 0.25))}
+        onFallback={() => {
+          setDpr(1)
+          setTier("low")
+        }}
+      />
+      <QualityContext.Provider value={tier}>
+        <ActivityBridge />
+        <ViewShift x={(cover.right - cover.left) / 2} y={(cover.bottom - cover.top) / 2} />
+        <ambientLight intensity={0.4} />
+        <directionalLight position={[3, 6, 4]} intensity={1.5} color="#ffffff" />
+        <directionalLight position={[-4, 3, -3]} intensity={0.45} color="#eef2ff" />
+        <ActiveLayerLight reduced={reduced} />
 
-      <Environment resolution={256} frames={1}>
-        <color attach="background" args={["#8f8a8c"]} />
-        <Lightformer intensity={2.4} rotation-x={Math.PI / 2} position={[0, 5, -1]} scale={[10, 5, 1]} />
-        <Lightformer intensity={1.3} rotation-y={Math.PI / 2} position={[-6, 1.5, 0]} scale={[9, 3, 1]} color="#fff0dc" />
-        <Lightformer intensity={1.1} rotation-y={-Math.PI / 2} position={[6, 1.5, 0]} scale={[9, 3, 1]} color="#e9f3ff" />
-        <Lightformer form="ring" intensity={1.6} position={[2.5, 3, 5]} scale={2.2} />
-        <Lightformer intensity={0.6} position={[0, -2, 6]} scale={[10, 2, 1]} color="#f5e6cf" />
-      </Environment>
+        <Environment resolution={tier === "high" ? 256 : 128} frames={1}>
+          <color attach="background" args={["#8e8b87"]} />
+          <Lightformer intensity={2.4} rotation-x={Math.PI / 2} position={[0, 5, -1]} scale={[10, 5, 1]} />
+          <Lightformer intensity={1.2} rotation-y={Math.PI / 2} position={[-6, 1.5, 0]} scale={[9, 3, 1]} />
+          <Lightformer intensity={1.1} rotation-y={-Math.PI / 2} position={[6, 1.5, 0]} scale={[9, 3, 1]} />
+          <Lightformer form="ring" intensity={1.5} position={[2.5, 3, 5]} scale={2.2} />
+          <Lightformer intensity={0.5} position={[0, -2, 6]} scale={[10, 2, 1]} />
+        </Environment>
 
-      <Suspense fallback={null}>
         <Keyboard animator={animator} reduced={reduced} pointer={pointer} />
         <Ready onReady={onReady} />
-      </Suspense>
 
-      <Table />
-      <ContactShadows
-        position={[0, 0.004, 0.1]}
-        opacity={0.5}
-        scale={9}
-        blur={2.6}
-        far={3.6}
-        resolution={512}
-        color="#410b29"
-      />
+        {/* el compositor de Bloom no respeta el degradé de alfa del piso:
+            con las luces prendidas queda solo la sombra de contacto */}
+        {rgbOn ? null : <Floor dark={dark} />}
+        <ContactShadows
+          position={[0, 0.004, 0.1]}
+          opacity={dark ? 0.7 : 0.42}
+          scale={9}
+          blur={tier === "high" ? 2.6 : 2}
+          far={3.6}
+          resolution={tier === "high" ? 512 : 256}
+          color="#1e1a16"
+        />
 
-      <CameraRig reduced={reduced} cover={cover} />
+        <CameraRig reduced={reduced} cover={cover} />
 
-      {rgbOn ? (
-        <EffectComposer multisampling={4}>
-          <Bloom mipmapBlur luminanceThreshold={1.05} luminanceSmoothing={0.2} intensity={0.9} radius={0.72} />
-          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        </EffectComposer>
-      ) : null}
+        {rgbOn ? (
+          <EffectComposer multisampling={tier === "high" ? 4 : 0}>
+            <Bloom mipmapBlur luminanceThreshold={1.05} luminanceSmoothing={0.2} intensity={0.9} radius={0.72} />
+            <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+          </EffectComposer>
+        ) : null}
+      </QualityContext.Provider>
     </Canvas>
   )
+}
+
+/** Conecta la escena con las fuentes de actividad (store, mouse, teclado). */
+function ActivityBridge() {
+  const invalidate = useThree((s) => s.invalidate)
+  useEffect(() => {
+    bindInvalidate(invalidate)
+    const unsubscribe = useConfigurator.subscribe(() => wake())
+    wake()
+    return () => {
+      unsubscribe()
+      bindInvalidate(null)
+    }
+  }, [invalidate])
+  return null
 }
 
 function Ready({ onReady }: { onReady: () => void }) {
@@ -98,6 +145,7 @@ function Ready({ onReady }: { onReady: () => void }) {
 function ViewShift({ x, y }: { x: number; y: number }) {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera
   const size = useThree((s) => s.size)
+  const invalidate = useThree((s) => s.invalidate)
   useEffect(() => {
     if (Math.abs(x) < 1 && Math.abs(y) < 1) {
       camera.clearViewOffset()
@@ -105,7 +153,8 @@ function ViewShift({ x, y }: { x: number; y: number }) {
       camera.setViewOffset(size.width, size.height, x, y, size.width, size.height)
     }
     camera.updateProjectionMatrix()
-  }, [camera, x, y, size.width, size.height])
+    invalidate()
+  }, [camera, x, y, size.width, size.height, invalidate])
   return null
 }
 
@@ -116,7 +165,7 @@ function ActiveLayerLight({ reduced }: { reduced: boolean }) {
   const placed = useConfigurator((s) => s.placed)
   const phase = useConfigurator((s) => s.phase)
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const l = light.current
     if (!l) return
     const active = activeStepIndex(placed)
@@ -124,55 +173,49 @@ function ActiveLayerLight({ reduced }: { reduced: boolean }) {
     const on = phase === "building" && placed < LAYER_COUNT
     target.position.set(0, y, ACTIVE_FORWARD)
     l.position.set(0.6, y + 3.2, ACTIVE_FORWARD + 2.4)
-    const goal = on ? 26 : 0
+    const goal = on ? 22 : 0
     l.intensity = reduced ? goal : THREE.MathUtils.damp(l.intensity, goal, 4, Math.min(delta, 1 / 30))
+    if (Math.abs(l.intensity - goal) > 0.01) state.invalidate()
+    else l.intensity = goal
   })
 
   return (
     <>
       <primitive object={target} />
-      <spotLight
-        ref={light}
-        target={target}
-        angle={0.42}
-        penumbra={0.85}
-        distance={9}
-        decay={1.6}
-        color="#fff6ea"
-        intensity={0}
-      />
+      <spotLight ref={light} target={target} angle={0.42} penumbra={0.85} distance={9} decay={1.6} color="#ffffff" intensity={0} />
     </>
   )
 }
 
-/** Mesa de madera bajo el teclado, fundida con el fondo en los bordes. */
-function Table() {
-  // en modo oscuro la madera se apaga para no leerse como un foco
-  const dark = useMediaQuery("(prefers-color-scheme: dark)")
-  const { wood, fade } = useMemo(() => {
-    const w = createWoodTexture()
-    w.repeat.set(2.2, 1.4)
-    return { wood: w, fade: createFadeTexture() }
+/** Superficie mate de estudio bajo el teclado, fundida con el fondo. */
+function Floor({ dark }: { dark: boolean }) {
+  const fade = useMemo(() => {
+    const size = 256
+    const canvas = document.createElement("canvas")
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext("2d")!
+    const grad = ctx.createRadialGradient(size / 2, size * 0.5, size * 0.08, size / 2, size * 0.5, size * 0.5)
+    grad.addColorStop(0, "#ffffff")
+    grad.addColorStop(0.55, "#9a9a9a")
+    grad.addColorStop(1, "#000000")
+    ctx.fillStyle = grad
+    ctx.fillRect(0, 0, size, size)
+    return new THREE.CanvasTexture(canvas)
   }, [])
-  useEffect(
-    () => () => {
-      wood.dispose()
-      fade.dispose()
-    },
-    [wood, fade]
-  )
+  useEffect(() => () => fade.dispose(), [fade])
+
   return (
-    <mesh rotation-x={-Math.PI / 2} position={[0, -0.002, 0.3]}>
-      <planeGeometry args={[13, 8]} />
+    <mesh rotation-x={-Math.PI / 2} position={[0, -0.002, 0.2]}>
+      <planeGeometry args={[12, 8]} />
       <meshStandardMaterial
-        color={dark ? "#7d6c5f" : "#ffe9c4"}
-        map={wood}
+        color={dark ? "#2a2826" : "#e2ded8"}
         alphaMap={fade}
         transparent
-        roughness={0.68}
+        roughness={1}
         metalness={0}
         depthWrite={false}
-        envMapIntensity={0.6}
+        envMapIntensity={0.25}
       />
     </mesh>
   )

@@ -1,10 +1,10 @@
 export type FormatId = "60" | "75" | "tkl"
-export type CaseId = "grafito" | "plata" | "ciruela" | "mostaza" | "turquesa" | "hielo"
+export type CaseId = "grafito" | "plata" | "arena" | "salvia" | "noche" | "hielo"
 export type PlateId = "aluminio" | "laton" | "policarbonato" | "fr4"
 export type SwitchId = "lineal" | "tactil" | "clicky"
 export type KeycapSetId = "malbec" | "rio" | "yerba" | "medianoche"
 export type KnobId = "ninguna" | "aluminio" | "laton"
-export type CableId = "grafito" | "ciruela" | "mostaza" | "turquesa"
+export type CableId = "grafito" | "hueso" | "salvia" | "coral"
 export type RgbMode = "apagada" | "fija" | "ola"
 
 export interface Config {
@@ -105,9 +105,9 @@ export const FORMATS: FormatOption[] = [
 export const CASES: CaseOption[] = [
   { id: "grafito", name: "Grafito", detail: "Aluminio anodizado", price: 0, color: "#3a3a3f", material: "aluminio" },
   { id: "plata", name: "Plata", detail: "Aluminio anodizado", price: 0, color: "#c4c7cb", material: "aluminio" },
-  { id: "ciruela", name: "Ciruela", detail: "Aluminio anodizado", price: 14000, color: "#5b2346", material: "aluminio" },
-  { id: "mostaza", name: "Mostaza", detail: "Aluminio anodizado", price: 14000, color: "#c98d17", material: "aluminio" },
-  { id: "turquesa", name: "Turquesa", detail: "Aluminio anodizado", price: 14000, color: "#0a8f8c", material: "aluminio" },
+  { id: "arena", name: "Arena", detail: "Aluminio anodizado", price: 14000, color: "#c8b79c", material: "aluminio" },
+  { id: "salvia", name: "Salvia", detail: "Aluminio anodizado", price: 14000, color: "#8c9f88", material: "aluminio" },
+  { id: "noche", name: "Noche", detail: "Aluminio anodizado", price: 14000, color: "#2b3a5e", material: "aluminio" },
   { id: "hielo", name: "Hielo", detail: "Policarbonato translúcido", price: 6000, color: "#e8eef2", material: "policarbonato" },
 ]
 
@@ -187,9 +187,9 @@ export const KNOBS: KnobOption[] = [
 
 export const CABLES: CableOption[] = [
   { id: "grafito", name: "Grafito", detail: "Espiral con conector aviador", price: 16000, color: "#2e2e33" },
-  { id: "ciruela", name: "Ciruela", detail: "Espiral con conector aviador", price: 18000, color: "#6a2752" },
-  { id: "mostaza", name: "Mostaza", detail: "Espiral con conector aviador", price: 18000, color: "#d6a020" },
-  { id: "turquesa", name: "Turquesa", detail: "Espiral con conector aviador", price: 18000, color: "#07a7a4" },
+  { id: "hueso", name: "Hueso", detail: "Espiral con conector aviador", price: 18000, color: "#e6e0d4" },
+  { id: "salvia", name: "Salvia", detail: "Espiral con conector aviador", price: 18000, color: "#7d9178" },
+  { id: "coral", name: "Coral", detail: "Espiral con conector aviador", price: 18000, color: "#e0664c" },
 ]
 
 export const RGB_MODES: RgbOption[] = [
@@ -202,7 +202,7 @@ export const RGB_PRESETS: { name: string; hex: string }[] = [
   { name: "Ámbar", hex: "#ff9a2e" },
   { name: "Rojo", hex: "#ff3b30" },
   { name: "Blanco cálido", hex: "#ffe2b8" },
-  { name: "Turquesa", hex: "#19c2bf" },
+  { name: "Celeste", hex: "#5ec8ff" },
   { name: "Rosa", hex: "#ff5fa8" },
 ]
 
@@ -215,7 +215,7 @@ export const DEFAULT_CONFIG: Config = {
   switches: "tactil",
   keycaps: "malbec",
   knob: "aluminio",
-  cable: "ciruela",
+  cable: "hueso",
   rgbMode: "apagada",
   rgbColor: "#ff9a2e",
   engraving: "",

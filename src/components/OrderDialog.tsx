@@ -82,22 +82,22 @@ export function OrderDialog({ open, onOpenChange }: OrderDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="gap-4">
+      <DialogContent>
         {orderNumber ? (
           <>
             <DialogHeader>
               <DialogTitle>Pedido {orderNumber}</DialogTitle>
-              <DialogDescription>Tu teclado ya tiene lugar en el banco de trabajo.</DialogDescription>
+              <DialogDescription>Tu teclado ya tiene lugar en el taller.</DialogDescription>
             </DialogHeader>
-            <div className="flex gap-3 px-6 pt-1">
-              <CheckCircle weight="fill" className="mt-0.5 size-7 shrink-0 text-turquesa" />
-              <p className="text-[15px] leading-relaxed">
+            <div className="flex gap-3">
+              <CheckCircle weight="fill" className="mt-0.5 size-7 shrink-0 text-accent" />
+              <p className="text-sm leading-relaxed">
                 Gracias, {name.trim().split(" ")[0]}. Te escribimos a <strong>{email.trim()}</strong> con el link de
                 pago por {formatPrice(total)} y la fecha de entrega. Lo armamos a mano en unas 3 semanas.
               </p>
             </div>
             <DialogFooter>
-              <Button variant="ribbon" onClick={() => handleOpenChange(false)}>
+              <Button variant="primary" onClick={() => handleOpenChange(false)}>
                 Listo
               </Button>
             </DialogFooter>
@@ -110,7 +110,7 @@ export function OrderDialog({ open, onOpenChange }: OrderDialogProps) {
                 {summary}. Total {formatPrice(total)}.
               </DialogDescription>
             </DialogHeader>
-            <div className="flex flex-col gap-4 px-6 pt-1">
+            <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <Label htmlFor={`${id}-nombre`}>Nombre y apellido</Label>
                 <Input
@@ -122,7 +122,7 @@ export function OrderDialog({ open, onOpenChange }: OrderDialogProps) {
                   aria-describedby={errors.name ? `${id}-nombre-error` : undefined}
                 />
                 {errors.name ? (
-                  <p id={`${id}-nombre-error`} className="text-sm text-rojo">
+                  <p id={`${id}-nombre-error`} className="text-sm text-danger">
                     {errors.name}
                   </p>
                 ) : null}
@@ -140,7 +140,7 @@ export function OrderDialog({ open, onOpenChange }: OrderDialogProps) {
                   aria-describedby={errors.email ? `${id}-email-error` : `${id}-email-ayuda`}
                 />
                 {errors.email ? (
-                  <p id={`${id}-email-error`} className="text-sm text-rojo">
+                  <p id={`${id}-email-error`} className="text-sm text-danger">
                     {errors.email}
                   </p>
                 ) : (
@@ -156,15 +156,15 @@ export function OrderDialog({ open, onOpenChange }: OrderDialogProps) {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
-                  className="w-full resize-none border border-input bg-card px-3 py-2 text-base text-foreground outline-none focus-visible:border-turquesa-profundo focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                  className="w-full resize-none rounded-xl border border-input bg-card px-3.5 py-2.5 text-base text-foreground outline-none focus-visible:border-accent focus-visible:ring-[3px] focus-visible:ring-ring/25 md:text-sm"
                 />
               </div>
             </div>
-            <DialogFooter className="pt-2">
+            <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>
                 Seguir editando
               </Button>
-              <Button type="submit" variant="ribbon">
+              <Button type="submit" variant="primary">
                 Confirmar pedido
               </Button>
             </DialogFooter>

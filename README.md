@@ -12,27 +12,27 @@ npm run build      # typecheck + build de producción en dist/
 
 ## Qué hace
 
-- **Armado por capas.** Cada capa flota con balanceo leve y se inclina siguiendo al mouse. La capa activa queda al frente, iluminada con un spot. Con **+ Encastrar** baja con un rebote y suena al apoyar; con **− Quitar** se separa la última. Tocar un paso ya hecho despieza desde ahí.
-- **Modelo hecho por código** (no hay `public/models/teclado.glb`): carcasa extruida con biselado y base en cuña para la inclinación de escritura, placa visible, switches con vástago en cruz, teclas esculpidas por fila con leyendas, perilla moleteada y cable en espiral con `TubeGeometry`. Luz de estudio con `Environment` + `Lightformer` (sin descargar HDRs), `ContactShadows` y mesa de madera procedural.
-- **Opciones:** 3 formatos (60%, 75%, TKL) con reacomodo animado tecla por tecla, 5 aluminios anodizados y policarbonato translúcido, 4 placas, 3 switches con sonido sintetizado (Web Audio), 4 juegos de teclas (Malbec, Río de la Plata, Yerba, Medianoche) con acentos de PBT o resina con transmisión, perilla, cable, retroiluminación apagada/fija/ola con Bloom, y grabado en vivo en la barra espaciadora.
-- **Interacción:** arrastrar para rotar, rueda para zoom con límites, autorrotación en reposo, cámara que viaja según la categoría y que calcula la distancia para encuadrar el modelo en el espacio que deja libre la interfaz. Tipear en el teclado físico hunde la tecla del modelo y suena con el switch elegido.
-- **Compartir:** la configuración se guarda en la URL (`?f=75&c=ciruela&...`); el link abre el mismo teclado armado.
-- **Galería de la comunidad:** 6 teclados con filtros Recientes / Tendencia / Más votados, votos guardados en el navegador y “Abrir en el configurador”.
-- **Encargar:** formulario con validación y confirmación de pedido.
-- `prefers-reduced-motion`: sin autorrotación, sin viajes de cámara, sin giro final ni balanceo. Modo oscuro por `prefers-color-scheme`.
+- **Pantalla completa, sin scroll.** La app ocupa exactamente el alto de la pantalla. “Armá el tuyo” y “Galería” son dos vistas que se cruzan con un fundido; el 3D queda montado y en pausa mientras se mira la galería.
+- **Armado por capas.** Las capas flotan con balanceo leve y se inclinan siguiendo al mouse. La activa queda al frente e iluminada. **+ Encastrar** la baja con rebote y sonido; **−** separa la última. Al completar, gira 360° y aparece el resumen.
+- **Modelo hecho por código:** carcasa biselada en cuña, placa, switches, teclas esculpidas por fila, perilla moleteada y cable en espiral, sobre una superficie mate de estudio con sombra de contacto.
+- **Opciones:** 3 formatos con reacomodo animado, 5 aluminios y policarbonato, 4 placas, 3 switches con sonido sintetizado, 4 juegos de teclas, perilla, cable, luces apagada/fija/ola y grabado en vivo.
+- **Cámara:** cada categoría tiene su ángulo, siempre con el teclado completo en cuadro (el encuadre se calcula según el espacio que deja la interfaz). La rueda solo hace un zoom corto (±20%) y nunca desplaza la página.
+- **Mobile:** el modelo ocupa al menos el 55% de la pantalla y el panel va abajo; arrastrar el modelo no mueve la página.
+- Tipeo desde el teclado físico, configuración compartible por URL, galería con filtros y votos, pedido con validación, `prefers-reduced-motion` y modo oscuro.
+
+## Rendimiento
+
+- Teclas y switches instanciados (`InstancedMesh`): un mesh por combinación de ancho, fila y material. Todas las leyendas salen de un único atlas en un solo draw call.
+- `frameloop="demand"`: se dibuja solo cuando algo se mueve. El balanceo y la autorrotación corren mientras hay actividad reciente y se apagan solos a los 30 s.
+- `PerformanceMonitor` baja el pixel ratio si caen los FPS y pasa a calidad baja si no alcanza.
+- Mobile arranca en calidad baja: resina y policarbonato sin transmisión, sombras a 256 px, sin antialias de hardware.
+- Bloom solo con la retroiluminación prendida. El 3D se carga en diferido con una silueta de carga.
 
 ## Diseño
 
-La dirección visual sale de `/referencias` y está en [`design-dna.json`](design-dna.json), generado con el skill **design-dna**: colores medidos con su script (recortando el marco oscuro de las capturas), tipografía Barlow Condensed / Barlow / Bungee Inline, cintas turquesa con subrayado mostaza a rojo, fondo de rombos, mesa de madera y la galería en bloque ciruela. La verificación del skill da ΔE medio 2,97 (configurador contra ref-1) y 3,15 (galería contra ref-2), con la deriva de cobertura dentro de umbral; el detalle está en `visual_effects.composite_notes`.
+Estudio de producto claro, tipo catálogo: gris cálido casi blanco con un degradé sutil, Geist como única tipografía, un solo acento azul para las acciones principales y la interfaz en neutros. El detalle está en [`design-dna.json`](design-dna.json). De las referencias solo se tomó la mecánica.
 
-## Componentes
-
-- **shadcn/ui** como base (button, toggle, toggle-group, tabs, dialog, tooltip, input, label, sonner), restilizados al DNA: esquinas vivas, mayúsculas condensadas, paleta de marca.
-- Piezas puntuales adaptadas al DNA. Los registros de shadcn, Magic UI, Motion Primitives, React Bits y Aceternity están bloqueados por la red de este entorno, así que el código original se tomó de sus repos en GitHub y se adaptó:
-  - `NumberTicker` (Magic UI) para el precio.
-  - `GridPattern` (Magic UI), convertido en `DiamondPattern` para el arlequín de rombos.
-  - `TextEffect` (Motion Primitives) para el título de cada paso.
-  - `Carousel` (React Bits), base de `OptionCarousel` con arrastre, inercia y flechas.
+Componentes: shadcn/ui como base, más piezas adaptadas de Magic UI (`NumberTicker`), Motion Primitives (`TextEffect`) y React Bits (`Carousel`). Sus registros están bloqueados en este entorno, así que el código se tomó de sus repos en GitHub.
 
 ## Estructura
 

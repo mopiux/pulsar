@@ -1,46 +1,69 @@
 import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react"
+import { motion, useReducedMotion } from "motion/react"
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useConfigurator } from "@/store/configurator"
+import { cn } from "@/lib/utils"
+import { useConfigurator, type View } from "@/store/configurator"
 
-import { Logo } from "./Logo"
-
-const link =
-  "font-display text-sm font-bold tracking-[0.12em] text-crema/75 uppercase transition-colors outline-none hover:text-crema focus-visible:text-crema focus-visible:ring-[3px] focus-visible:ring-crema/50 sm:text-[15px]"
+const VIEWS: { id: View; label: string }[] = [
+  { id: "configurador", label: "Armá el tuyo" },
+  { id: "galeria", label: "Galería" },
+]
 
 export function SiteHeader() {
   const soundOn = useConfigurator((s) => s.soundOn)
   const toggleSound = useConfigurator((s) => s.toggleSound)
+  const view = useConfigurator((s) => s.view)
+  const setView = useConfigurator((s) => s.setView)
+  const reduce = useReducedMotion()
 
   return (
-    <header className="sticky top-0 z-(--z-header) h-14 bg-ciruela">
-      <nav aria-label="Principal" className="mx-auto grid h-full max-w-[1280px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:gap-10">
-        <a href="#configurador" className={`${link} justify-self-end`}>
-          Armá el tuyo
-        </a>
-        <a href="#configurador" className="relative z-10 -mb-5 self-start pt-1.5 outline-none focus-visible:ring-[3px] focus-visible:ring-crema/50" aria-label="Pulsa, ir al configurador">
-          <Logo />
-        </a>
-        <div className="flex items-center justify-between gap-3">
-          <a href="#galeria" className={link}>
-            Galería
-          </a>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={toggleSound}
-                aria-pressed={soundOn}
-                aria-label={soundOn ? "Silenciar sonidos" : "Activar sonidos"}
-                className="grid size-10 place-items-center text-crema/80 transition-colors outline-none hover:bg-crema/10 hover:text-crema focus-visible:ring-[3px] focus-visible:ring-crema/50"
-              >
-                {soundOn ? <SpeakerHigh weight="bold" className="size-5" /> : <SpeakerSlash weight="bold" className="size-5" />}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">{soundOn ? "Silenciar sonidos" : "Activar sonidos"}</TooltipContent>
-          </Tooltip>
-        </div>
+    <header className="relative z-(--z-header) grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-5">
+      <span className="text-[17px] font-semibold tracking-tight">Pulsa</span>
+
+      <nav aria-label="Vistas" className="flex items-center gap-0.5 rounded-full bg-muted p-1">
+        {VIEWS.map((v) => {
+          const active = view === v.id
+          return (
+            <button
+              key={v.id}
+              type="button"
+              aria-current={active ? "page" : undefined}
+              onClick={() => setView(v.id)}
+              className={cn(
+                "relative h-8 rounded-full px-3.5 text-[13px] font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/45",
+                active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {active ? (
+                <motion.span
+                  layoutId="vista-activa"
+                  transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 36 }}
+                  className="absolute inset-0 rounded-full bg-card shadow-soft"
+                />
+              ) : null}
+              <span className="relative">{v.label}</span>
+            </button>
+          )
+        })}
       </nav>
+
+      <div className="flex justify-end">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={toggleSound}
+              aria-pressed={soundOn}
+              aria-label={soundOn ? "Silenciar sonidos" : "Activar sonidos"}
+              className="grid size-9 place-items-center rounded-full text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/45"
+            >
+              {soundOn ? <SpeakerHigh className="size-[18px]" /> : <SpeakerSlash className="size-[18px]" />}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">{soundOn ? "Silenciar sonidos" : "Activar sonidos"}</TooltipContent>
+        </Tooltip>
+      </div>
     </header>
   )
 }

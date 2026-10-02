@@ -42,13 +42,13 @@ export function KeyboardPreview({ config, className, skeleton = false, title }: 
   const oy = bezel.top * PX
 
   const fill = (kind: string) => {
-    if (skeleton) return "var(--color-niebla)"
+    if (skeleton) return "var(--card)"
     if (kind === "mod") return caps.mod
     if (kind === "accent") return caps.accent
     return caps.alpha
   }
 
-  const caseFill = skeleton ? "#d5d5d5" : caseOpt.color
+  const caseFill = skeleton ? "var(--input)" : caseOpt.color
   const translucent = caseOpt.material === "policarbonato" && !skeleton
 
   return (
@@ -71,7 +71,7 @@ export function KeyboardPreview({ config, className, skeleton = false, title }: 
       </defs>
 
       {/* sombra de apoyo */}
-      <rect x={4} y={8} width={W - 8} height={D} rx={PX * 0.5} fill="rgba(46, 22, 37, 0.22)" />
+      <rect x={4} y={8} width={W - 8} height={D} rx={PX * 0.5} fill="rgb(var(--shadow-rgb) / 0.18)" />
       <rect
         width={W}
         height={D}
@@ -89,7 +89,7 @@ export function KeyboardPreview({ config, className, skeleton = false, title }: 
         width={width * PX + PX * 0.12}
         height={depth * PX + PX * 0.12}
         rx={2}
-        fill={skeleton ? "#c9c9c9" : plate.color}
+        fill={skeleton ? "var(--border)" : plate.color}
       />
       {glow && !skeleton ? (
         <rect

@@ -11,6 +11,8 @@ import {
   type Config,
 } from "@/data/catalog"
 
+import { useQuality } from "./quality"
+
 function useDisposable<T extends THREE.Material | THREE.Material[]>(factory: () => T, deps: unknown[]): T {
   const value = useMemo(factory, deps)
   useEffect(
@@ -23,24 +25,45 @@ function useDisposable<T extends THREE.Material | THREE.Material[]>(factory: () 
   return value
 }
 
+/**
+ * Plástico translúcido: con calidad alta usa transmisión real; con calidad
+ * baja (mobile o FPS bajos) se resuelve con opacidad, que es mucho más barato.
+ */
+function translucent(color: string, high: boolean, opts: { roughness: number; thickness: number; ior: number; attenuation: string; distance: number }) {
+  if (high) {
+    return new THREE.MeshPhysicalMaterial({
+      color,
+      metalness: 0,
+      roughness: opts.roughness,
+      transmission: 0.9,
+      thickness: opts.thickness,
+      ior: opts.ior,
+      attenuationColor: new THREE.Color(opts.attenuation),
+      attenuationDistance: opts.distance,
+      clearcoat: 0.6,
+      clearcoatRoughness: 0.2,
+      transparent: true,
+    })
+  }
+  return new THREE.MeshPhysicalMaterial({
+    color,
+    metalness: 0,
+    roughness: opts.roughness,
+    transparent: true,
+    opacity: 0.72,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.25,
+    depthWrite: false,
+  })
+}
+
 /** Aluminio anodizado (satinado) o policarbonato translúcido. */
 export function useCaseMaterial(config: Config) {
   const option = getCase(config.case)
+  const high = useQuality() === "high"
   return useDisposable(() => {
     if (option.material === "policarbonato") {
-      return new THREE.MeshPhysicalMaterial({
-        color: option.color,
-        metalness: 0,
-        roughness: 0.18,
-        transmission: 0.9,
-        thickness: 0.35,
-        ior: 1.58,
-        attenuationColor: new THREE.Color("#cfdde6"),
-        attenuationDistance: 1.4,
-        clearcoat: 0.6,
-        clearcoatRoughness: 0.2,
-        transparent: true,
-      })
+      return translucent(option.color, high, { roughness: 0.18, thickness: 0.35, ior: 1.58, attenuation: "#cfdde6", distance: 1.4 })
     }
     return new THREE.MeshPhysicalMaterial({
       color: option.color,
@@ -50,45 +73,50 @@ export function useCaseMaterial(config: Config) {
       clearcoatRoughness: 0.45,
       envMapIntensity: 1.1,
     })
-  }, [option.id])
+  }, [option.id, high])
 }
 
 export function usePlateMaterial(config: Config) {
   const plate = getPlate(config.plate)
+  const high = useQuality() === "high"
   return useDisposable(() => {
     if (plate.translucent) {
-      return new THREE.MeshPhysicalMaterial({
-        color: plate.color,
-        roughness: plate.roughness,
-        metalness: 0,
-        transmission: 0.75,
-        thickness: 0.05,
-        ior: 1.58,
-        transparent: true,
-      })
+      return high
+        ? new THREE.MeshPhysicalMaterial({
+            color: plate.color,
+            roughness: plate.roughness,
+            metalness: 0,
+            transmission: 0.75,
+            thickness: 0.05,
+            ior: 1.58,
+            transparent: true,
+          })
+        : new THREE.MeshStandardMaterial({ color: plate.color, roughness: plate.roughness, transparent: true, opacity: 0.8 })
     }
     return new THREE.MeshStandardMaterial({
       color: plate.color,
       metalness: plate.metalness,
       roughness: plate.roughness,
     })
-  }, [plate.id])
+  }, [plate.id, high])
 }
 
 export interface KeycapMaterials {
-  alpha: THREE.Material
-  mod: THREE.Material
-  accent: THREE.Material
+  /** PBT mate en blanco: el color de cada tecla llega por instancia */
+  pbt: THREE.Material
+  /** resina translúcida de las teclas de acento (solo en algunos juegos) */
+  resin: THREE.Material
+  colors: { alpha: string; mod: string; accent: string }
   legend: { alpha: string; mod: string; accent: string }
+  resinAccent: boolean
 }
 
-/** PBT mate para alfas y modificadores; resina translúcida en los acentos. */
 export function useKeycapMaterials(config: Config): KeycapMaterials {
   const set = getKeycapSet(config.keycaps)
-  const materials = useDisposable(() => {
-    const pbt = (color: string) =>
-      new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0, envMapIntensity: 0.7 })
-    const accent = set.resinAccent
+  const high = useQuality() === "high"
+  const [pbt, resin] = useDisposable(() => {
+    const base = new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.82, metalness: 0, envMapIntensity: 0.7 })
+    const accent = high
       ? new THREE.MeshPhysicalMaterial({
           color: set.accent,
           roughness: 0.12,
@@ -102,15 +130,24 @@ export function useKeycapMaterials(config: Config): KeycapMaterials {
           clearcoatRoughness: 0.08,
           transparent: true,
         })
-      : pbt(set.accent)
-    return [pbt(set.alpha), pbt(set.mod), accent]
-  }, [set.id])
+      : new THREE.MeshPhysicalMaterial({
+          color: set.accent,
+          roughness: 0.15,
+          metalness: 0,
+          clearcoat: 1,
+          clearcoatRoughness: 0.1,
+          transparent: true,
+          opacity: 0.86,
+        })
+    return [base, accent]
+  }, [set.id, high])
 
   return {
-    alpha: materials[0],
-    mod: materials[1],
-    accent: materials[2],
+    pbt,
+    resin,
+    colors: { alpha: set.alpha, mod: set.mod, accent: set.accent },
     legend: { alpha: set.alphaLegend, mod: set.modLegend, accent: set.accentLegend },
+    resinAccent: set.resinAccent,
   }
 }
 

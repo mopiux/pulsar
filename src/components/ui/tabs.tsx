@@ -3,8 +3,7 @@ import { Tabs as TabsPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-// Pestañas con forma de etiqueta de color pleno, como "Latest / Trending /
-// Most popular" de ref-2. El color de cada pestaña llega por --tab-color.
+// Mismo control en píldora que el resto de la interfaz.
 function Tabs({
   className,
   ...props
@@ -25,7 +24,7 @@ function TabsList({
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
-      className={cn("inline-flex w-fit flex-wrap items-end gap-1", className)}
+      className={cn("inline-flex w-fit items-center gap-0.5 rounded-full bg-muted p-1", className)}
       {...props}
     />
   )
@@ -33,20 +32,15 @@ function TabsList({
 
 function TabsTrigger({
   className,
-  style,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Trigger> & {
-  style?: React.CSSProperties & { "--tab-color"?: string; "--tab-ink"?: string }
-}) {
+}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
-      style={style}
       className={cn(
-        "inline-flex h-9 items-center gap-1.5 px-4 font-display text-sm font-bold tracking-[0.08em] whitespace-nowrap uppercase outline-none",
-        "bg-crema/8 text-crema/80 transition-[background-color,color,height] duration-200 hover:bg-crema/14 hover:text-crema",
-        "focus-visible:ring-[3px] focus-visible:ring-crema/60",
-        "data-[state=active]:h-11 data-[state=active]:bg-(--tab-color) data-[state=active]:text-(--tab-ink)",
+        "inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-[background-color,color,box-shadow] outline-none",
+        "hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/45",
+        "data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-soft",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
