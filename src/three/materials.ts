@@ -65,13 +65,14 @@ export function useCaseMaterial(config: Config) {
     if (option.material === "policarbonato") {
       return translucent(option.color, high, { roughness: 0.18, thickness: 0.35, ior: 1.58, attenuation: "#cfdde6", distance: 1.4 })
     }
+    // anodizado: metal satinado con una capa fina que levanta reflejos limpios
     return new THREE.MeshPhysicalMaterial({
       color: option.color,
-      metalness: 0.78,
-      roughness: 0.36,
-      clearcoat: 0.25,
-      clearcoatRoughness: 0.45,
-      envMapIntensity: 1.1,
+      metalness: 0.86,
+      roughness: 0.3,
+      clearcoat: 0.35,
+      clearcoatRoughness: 0.22,
+      envMapIntensity: 1.25,
     })
   }, [option.id, high])
 }
@@ -86,17 +87,19 @@ export function usePlateMaterial(config: Config) {
             color: plate.color,
             roughness: plate.roughness,
             metalness: 0,
-            transmission: 0.75,
+            transmission: 0.55,
             thickness: 0.05,
             ior: 1.58,
             transparent: true,
           })
-        : new THREE.MeshStandardMaterial({ color: plate.color, roughness: plate.roughness, transparent: true, opacity: 0.8 })
+        : new THREE.MeshStandardMaterial({ color: plate.color, roughness: plate.roughness, transparent: true, opacity: 0.6 })
     }
+    // la placa queda en penumbra entre la carcasa y las teclas: reflejos bajos
     return new THREE.MeshStandardMaterial({
       color: plate.color,
       metalness: plate.metalness,
       roughness: plate.roughness,
+      envMapIntensity: 0.45,
     })
   }, [plate.id, high])
 }
@@ -109,6 +112,7 @@ export interface KeycapMaterials {
   colors: { alpha: string; mod: string; accent: string }
   legend: { alpha: string; mod: string; accent: string }
   resinAccent: boolean
+  shineThrough: boolean
 }
 
 export function useKeycapMaterials(config: Config): KeycapMaterials {
@@ -116,28 +120,35 @@ export function useKeycapMaterials(config: Config): KeycapMaterials {
   const high = useQuality() === "high"
   const [pbt, resin] = useDisposable(() => {
     const base = new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.82, metalness: 0, envMapIntensity: 0.7 })
+    // resina: casi transparente en la superficie, el color lo da el espesor
+    // (atenuación), con dispersión y barniz para que tenga profundidad
     const accent = high
       ? new THREE.MeshPhysicalMaterial({
-          color: set.accent,
-          roughness: 0.12,
+          color: new THREE.Color(set.accent).lerp(new THREE.Color("#ffffff"), 0.55),
+          roughness: 0.05,
           metalness: 0,
-          transmission: 0.82,
-          thickness: 0.18,
-          ior: 1.5,
+          transmission: 1,
+          thickness: 0.9,
+          ior: 1.52,
+          dispersion: 0.35,
           attenuationColor: new THREE.Color(set.accent),
-          attenuationDistance: 0.25,
+          attenuationDistance: 0.16,
+          specularIntensity: 1,
           clearcoat: 1,
-          clearcoatRoughness: 0.08,
-          transparent: true,
+          clearcoatRoughness: 0.03,
+          envMapIntensity: 1.4,
         })
       : new THREE.MeshPhysicalMaterial({
           color: set.accent,
-          roughness: 0.15,
+          emissive: new THREE.Color(set.accent).multiplyScalar(0.18),
+          roughness: 0.06,
           metalness: 0,
           clearcoat: 1,
-          clearcoatRoughness: 0.1,
+          clearcoatRoughness: 0.04,
+          specularIntensity: 1,
+          envMapIntensity: 1.4,
           transparent: true,
-          opacity: 0.86,
+          opacity: 0.8,
         })
     return [base, accent]
   }, [set.id, high])
@@ -148,6 +159,7 @@ export function useKeycapMaterials(config: Config): KeycapMaterials {
     colors: { alpha: set.alpha, mod: set.mod, accent: set.accent },
     legend: { alpha: set.alphaLegend, mod: set.modLegend, accent: set.accentLegend },
     resinAccent: set.resinAccent,
+    shineThrough: set.shineThrough,
   }
 }
 

@@ -302,15 +302,15 @@
       "technology": "Three.js vía @react-three/fiber + drei",
       "params": {
         "renderer": "WebGL2, fondo transparente sobre el degradé CSS, frameloop bajo demanda, pixel ratio adaptativo",
-        "lighting": "Environment con Lightformers neutros (softbox superior, laterales, aro frontal), direccional blanca y spot sobre la capa activa",
+        "lighting": "Estudio de tres puntos: luz principal cálida desde arriba a la izquierda, relleno frío suave y contraluz (rim) que recorta el borde; Environment con Lightformers en tiras tipo softbox para reflejos largos y limpios en el aluminio. La placa queda en penumbra: la única luz que sale de adentro es la de los LED, uno por tecla, concentrado debajo y escapando por los bordes.",
         "camera": "perspectiva 32°, encuadre calculado para que la pila entre completa en la zona libre de interfaz; zoom con rueda limitado a ±20%",
-        "materials": "aluminio anodizado satinado, PBT mate con color por instancia, resina y policarbonato con transmisión (opacidad en calidad baja), superficie mate de estudio",
+        "materials": "aluminio anodizado satinado con barniz fino, placa oscura de reflejo bajo, PBT mate con color por instancia, leyendas shine-through iluminadas por el LED de su tecla, resina con transmisión, dispersión y atenuación por espesor (opacidad en calidad baja), superficie mate de estudio",
         "geometry": "teclas esculpidas instanciadas por ancho y fila, switches instanciados, leyendas en un atlas único",
         "post_processing": [
-          "bloom solo con la retroiluminación prendida",
+          "bloom selectivo: solo los LED y las leyendas shine-through, y solo con la retroiluminación prendida",
           "tone mapping ACES"
         ],
-        "interaction_model": "arrastrar para rotar, rueda para un zoom corto, inclinación que sigue al mouse, autorrotación lenta en reposo hasta que la escena se duerme"
+        "interaction_model": "arrastrar para rotar, rueda para un zoom corto, inclinación que sigue al mouse, autorrotación lenta en reposo; el giro final de 360° lo hace la cámara alrededor del modelo quieto, así la sombra de contacto no cambia"
       }
     },
     "shader_effects": {
@@ -415,6 +415,6 @@
         "filter_effects": "none"
       }
     },
-    "composite_notes": "El lienzo WebGL es transparente sobre el degradé CSS, así el estudio continúa sin cortes detrás de la interfaz. La superficie mate es un plano con máscara radial; con la retroiluminación prendida (Bloom) se oculta y queda solo la sombra de contacto, porque el compositor no respeta su alfa. De la primera dirección (ciruela, turquesa, mostaza, rombos, madera, cintas, tipografía condensada) no queda nada. Esta dirección no viene de capturas medidas sino del brief, por eso no hay paleta medida ni verificación con verify.mjs."
+    "composite_notes": "El lienzo WebGL es transparente sobre el degradé CSS, así el estudio continúa sin cortes detrás de la interfaz. La superficie mate es un plano con máscara radial; con la retroiluminación prendida (Bloom) se oculta y queda solo la sombra de contacto, porque el compositor no respeta su alfa. De la primera dirección (ciruela, turquesa, mostaza, rombos, madera, cintas, tipografía condensada) no queda nada. Esta dirección no viene de capturas medidas sino del brief, por eso no hay paleta medida ni verificación con verify.mjs. Sombra: el cable en espiral, los LED y las leyendas viven en una capa que la cámara de ContactShadows no ve, así no proyectan rayas; el modelo nunca rota, rota la cámara. Las páginas de tienda (Nosotros, Ayuda, carrito lateral, footer) usan la misma dirección: tarjetas planas en card con borde fino, renders del propio teclado generados en modo vitrina (scripts/render-assets.mjs) en lugar de fotos."
   }
 }

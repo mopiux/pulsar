@@ -11,6 +11,8 @@ import { COMMUNITY_BUILDS, GALLERY_FILTERS, type CommunityBuild, type GalleryFil
 import { cn } from "@/lib/utils"
 import { useConfigurator } from "@/store/configurator"
 
+import { PageShell } from "./PageShell"
+
 const VOTES_KEY = "pulsa-votos"
 
 function loadVotes(): Set<string> {
@@ -63,44 +65,49 @@ export function Gallery() {
   }, [voted])
 
   return (
-    <section aria-labelledby="galeria-titulo" data-scroll className="h-full overflow-y-auto overscroll-contain">
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as GalleryFilter)} className="mx-auto max-w-[1180px] gap-5 px-4 py-6 sm:px-6 lg:py-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 id="galeria-titulo" className="text-2xl font-semibold tracking-tight">
-              Galería de la comunidad
-            </h1>
-            <p className="mt-1 max-w-[52ch] text-sm text-muted-foreground">
-              Votá tus favoritos o abrí cualquiera en el configurador para hacerlo tuyo.
-            </p>
-          </div>
-          <TabsList aria-label="Ordenar la galería">
-            {GALLERY_FILTERS.map((f) => (
-              <TabsTrigger key={f.id} value={f.id}>
-                {f.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
-        {GALLERY_FILTERS.map((f) => (
-          <TabsContent key={f.id} value={f.id}>
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {sorted[f.id].map((build, index) => (
-                <BuildCard
-                  key={build.id}
-                  build={build}
-                  index={index}
-                  filter={f.id}
-                  voted={voted.has(build.id)}
-                  onVote={() => toggleVote(build.id)}
-                />
+    <PageShell view="galeria" label="Galería">
+      <section aria-labelledby="galeria-titulo">
+        <Tabs
+          value={filter}
+          onValueChange={(v) => setFilter(v as GalleryFilter)}
+          className="mx-auto max-w-[1180px] gap-5 px-4 py-6 sm:px-6 lg:py-8"
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h1 id="galeria-titulo" className="text-2xl font-semibold tracking-tight">
+                Galería de la comunidad
+              </h1>
+              <p className="mt-1 max-w-[52ch] text-sm text-muted-foreground">
+                Votá tus favoritos o abrí cualquiera en el configurador para hacerlo tuyo.
+              </p>
+            </div>
+            <TabsList aria-label="Ordenar la galería">
+              {GALLERY_FILTERS.map((f) => (
+                <TabsTrigger key={f.id} value={f.id}>
+                  {f.label}
+                </TabsTrigger>
               ))}
-            </ul>
-          </TabsContent>
-        ))}
-        <p className="pt-2 text-center text-xs text-muted-foreground">Pulsa. Teclados mecánicos armados a mano en Buenos Aires.</p>
-      </Tabs>
-    </section>
+            </TabsList>
+          </div>
+          {GALLERY_FILTERS.map((f) => (
+            <TabsContent key={f.id} value={f.id}>
+              <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {sorted[f.id].map((build, index) => (
+                  <BuildCard
+                    key={build.id}
+                    build={build}
+                    index={index}
+                    filter={f.id}
+                    voted={voted.has(build.id)}
+                    onVote={() => toggleVote(build.id)}
+                  />
+                ))}
+              </ul>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </section>
+    </PageShell>
   )
 }
 
@@ -170,7 +177,7 @@ function BuildCard({ build, index, filter, voted, onVote }: BuildCardProps) {
           aria-label={`${voted ? "Quitar tu voto a" : "Votar"} ${build.name}, ${votes} votos`}
           className={cn(
             "flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium tabular-nums transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/45",
-            voted ? "bg-foreground text-background" : "bg-muted text-foreground hover:bg-border"
+            voted ? "bg-foreground text-background" : "bg-muted text-foreground hover:bg-border",
           )}
         >
           <ArrowFatUp weight={voted ? "fill" : "regular"} className="size-4" />

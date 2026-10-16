@@ -66,6 +66,7 @@ export function Configurator({ visible }: { visible: boolean }) {
   const reduce = useReducedMotion() ?? false
   const isDesktop = useMediaQuery("(min-width: 1024px)")
   const phase = useConfigurator((s) => s.phase)
+  const showcase = useConfigurator((s) => s.showcase)
   const { assemble, assembling } = useAssembleAll()
 
   const [ready, setReady] = useState(false)
@@ -92,7 +93,9 @@ export function Configurator({ visible }: { visible: boolean }) {
   const showSummary = phase === "complete"
   const cover = useMemo(
     () =>
-      isDesktop
+      showcase
+        ? { top: 0, bottom: 0, left: 0, right: 0 }
+        : isDesktop
         ? {
             top: topH + 12,
             bottom: phase === "building" ? bottomH + 16 : 0,
@@ -100,8 +103,18 @@ export function Configurator({ visible }: { visible: boolean }) {
             right: showSummary ? SUMMARY_WIDTH + 20 : 0,
           }
         : { top: topH + 8, bottom: 0, left: 0, right: 0 },
-    [isDesktop, topH, bottomH, phase, showSummary]
+    [showcase, isDesktop, topH, bottomH, phase, showSummary]
   )
+
+  if (showcase) {
+    return (
+      <section aria-label="Vitrina del teclado" className="relative h-full">
+        <Suspense fallback={null}>
+          <Scene reduced={reduce} visible cover={cover} onReady={onReady} fallback={null} />
+        </Suspense>
+      </section>
+    )
+  }
 
   const stage = (
     <div className="absolute inset-0">

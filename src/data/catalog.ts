@@ -71,6 +71,8 @@ export interface KeycapSet {
   accentLegend: string
   /** las teclas de acento son de resina translúcida */
   resinAccent: boolean
+  /** leyendas shine-through: dejan pasar la luz del LED */
+  shineThrough: boolean
 }
 
 export interface KnobOption {
@@ -112,9 +114,9 @@ export const CASES: CaseOption[] = [
 ]
 
 export const PLATES: PlateOption[] = [
-  { id: "aluminio", name: "Aluminio", detail: "Firme y parejo", price: 0, color: "#b9bdc2", metalness: 0.9, roughness: 0.38, translucent: false },
-  { id: "laton", name: "Latón", detail: "Pesado, sonido grave", price: 21000, color: "#c9a14a", metalness: 1, roughness: 0.3, translucent: false },
-  { id: "policarbonato", name: "Policarbonato", detail: "Flexible, deja pasar la luz", price: 8000, color: "#f4f6f8", metalness: 0, roughness: 0.45, translucent: true },
+  { id: "aluminio", name: "Aluminio", detail: "Anodizado oscuro, firme y parejo", price: 0, color: "#43474c", metalness: 0.55, roughness: 0.62, translucent: false },
+  { id: "laton", name: "Latón", detail: "Pesado, sonido grave", price: 21000, color: "#a8843a", metalness: 0.95, roughness: 0.4, translucent: false },
+  { id: "policarbonato", name: "Policarbonato", detail: "Flexible, deja pasar la luz", price: 8000, color: "#cdd3d8", metalness: 0, roughness: 0.55, translucent: true },
   { id: "fr4", name: "FR4", detail: "Fibra de vidrio, punto medio", price: 6000, color: "#27292b", metalness: 0.1, roughness: 0.72, translucent: false },
 ]
 
@@ -137,6 +139,7 @@ export const KEYCAP_SETS: KeycapSet[] = [
     accent: "#a62d45",
     accentLegend: "#f6ece4",
     resinAccent: false,
+    shineThrough: false,
   },
   {
     id: "rio",
@@ -150,6 +153,7 @@ export const KEYCAP_SETS: KeycapSet[] = [
     accent: "#f2b51c",
     accentLegend: "#4a3205",
     resinAccent: true,
+    shineThrough: false,
   },
   {
     id: "yerba",
@@ -163,11 +167,12 @@ export const KEYCAP_SETS: KeycapSet[] = [
     accent: "#a8752c",
     accentLegend: "#fbf3e3",
     resinAccent: false,
+    shineThrough: false,
   },
   {
     id: "medianoche",
     name: "Medianoche",
-    detail: "PBT con acentos de resina",
+    detail: "Leyendas shine-through y acentos de resina",
     price: 58000,
     alpha: "#23263a",
     alphaLegend: "#d7dbea",
@@ -176,6 +181,7 @@ export const KEYCAP_SETS: KeycapSet[] = [
     accent: "#e5432d",
     accentLegend: "#ffffff",
     resinAccent: true,
+    shineThrough: true,
   },
 ]
 

@@ -77,10 +77,13 @@ export const LAYER_COUNT = STEPS.length
  */
 export type Phase = "building" | "spinning" | "complete"
 
-export type View = "configurador" | "galeria"
+export type View = "configurador" | "galeria" | "nosotros" | "ayuda"
+
+export const VIEWS: View[] = ["configurador", "galeria", "nosotros", "ayuda"]
 
 interface ConfiguratorState {
   view: View
+  showcase: boolean
   config: Config
   /** cantidad de capas encastradas, siempre un prefijo desde la carcasa */
   placed: number
@@ -105,11 +108,22 @@ interface ConfiguratorState {
 
 export const activeStepIndex = (placed: number) => Math.min(placed, LAYER_COUNT - 1)
 
-const initialView = (): View =>
-  typeof window !== "undefined" && window.location.hash === "#galeria" ? "galeria" : "configurador"
+const initialView = (): View => {
+  if (typeof window === "undefined") return "configurador"
+  const hash = window.location.hash.slice(1) as View
+  return VIEWS.includes(hash) ? hash : "configurador"
+}
+
+/**
+ * Vitrina: muestra solo las capas encastradas y oculta la interfaz. Se usa
+ * para generar los renders de la página Nosotros (?vitrina=1).
+ */
+const initialShowcase = () =>
+  typeof window !== "undefined" && new URLSearchParams(window.location.search).has("vitrina")
 
 export const useConfigurator = create<ConfiguratorState>((set, get) => ({
   view: initialView(),
+  showcase: initialShowcase(),
   config: DEFAULT_CONFIG,
   placed: 0,
   phase: "building",

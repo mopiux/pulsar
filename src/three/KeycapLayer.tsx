@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useFrame } from "@react-three/fiber"
+import { Select } from "@react-three/postprocessing"
 import * as THREE from "three"
 
 import type { Config } from "@/data/catalog"
@@ -9,7 +10,9 @@ import { KEYCAP_BASE, PRESS_DEPTH, PROFILE, U } from "./constants"
 import { keycapGeometry, keycapTop } from "./geometry"
 import type { LayoutAnimator } from "./layoutAnimator"
 import { cellIndex, cellUv, ENGRAVING_ASPECT, engravingUv, LegendAtlas, legendFontReady, type LegendEntry } from "./legendAtlas"
+import { ledColor } from "./leds"
 import { useKeycapMaterials, type KeycapMaterials } from "./materials"
+import { NO_SHADOW_LAYER } from "./SwitchLayer"
 
 /*
   Teclas instanciadas: un InstancedMesh por combinación de ancho, fila del
@@ -117,16 +120,7 @@ function KeycapGroup({ group, materials, animator }: { group: Group; materials: 
 const LEGEND_SIZE = U * 0.78
 const LEGEND_COUNT = ALL_KEY_IDS.length + 1 // + franja de grabado
 
-function legendMaterial(map: THREE.Texture) {
-  const material = new THREE.MeshStandardMaterial({
-    map,
-    transparent: true,
-    depthWrite: false,
-    roughness: 0.75,
-    metalness: 0,
-    polygonOffset: true,
-    polygonOffsetFactor: -2,
-  })
+function withAtlasCells<T extends THREE.Material>(material: T): T {
   // cada instancia lee su propia celda del atlas
   material.onBeforeCompile = (shader) => {
     shader.vertexShader = shader.vertexShader
@@ -134,6 +128,35 @@ function legendMaterial(map: THREE.Texture) {
       .replace("#include <uv_vertex>", "#include <uv_vertex>\n#ifdef USE_MAP\n  vMapUv = vMapUv * aCell.zw + aCell.xy;\n#endif")
   }
   return material
+}
+
+/** Leyenda impresa: toma la luz de la escena como el resto de la tecla. */
+function printedMaterial(map: THREE.Texture) {
+  return withAtlasCells(
+    new THREE.MeshStandardMaterial({
+      map,
+      transparent: true,
+      depthWrite: false,
+      roughness: 0.75,
+      metalness: 0,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+    })
+  )
+}
+
+/** Leyenda shine-through: es luz del LED que pasa por la tecla. */
+function shineMaterial(map: THREE.Texture) {
+  return withAtlasCells(
+    new THREE.MeshBasicMaterial({
+      map,
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+    })
+  )
 }
 
 function Legends({
@@ -150,6 +173,7 @@ function Legends({
   const ref = useRef<THREE.InstancedMesh>(null)
   const atlas = useMemo(() => new LegendAtlas(), [])
   const [fontReady, setFontReady] = useState(false)
+  const glowing = materials.shineThrough && config.rgbMode !== "apagada"
 
   const geometry = useMemo(() => {
     const g = new THREE.PlaneGeometry(1, 1)
@@ -159,15 +183,17 @@ function Legends({
     g.setAttribute("aCell", new THREE.InstancedBufferAttribute(cells, 4))
     return g
   }, [])
-  const material = useMemo(() => legendMaterial(atlas.texture), [atlas])
+  const printed = useMemo(() => printedMaterial(atlas.texture), [atlas])
+  const shine = useMemo(() => shineMaterial(atlas.texture), [atlas])
 
   useEffect(
     () => () => {
       geometry.dispose()
-      material.dispose()
+      printed.dispose()
+      shine.dispose()
       atlas.dispose()
     },
-    [geometry, material, atlas]
+    [geometry, printed, shine, atlas]
   )
 
   useEffect(() => {
@@ -178,19 +204,30 @@ function Legends({
     }
   }, [])
 
+  // las leyendas que brillan se dibujan en blanco y toman el color del LED
   useEffect(() => {
     const present = new Map(layout.keys.map((k) => [k.id, k]))
     const entries = new Map<string, LegendEntry>()
     for (const id of ALL_KEY_IDS) {
       const def = present.get(id) ?? ANY_KEY_DEF[id]
-      entries.set(id, { label: def.label, color: materials.legend[kindOf(def)] })
+      entries.set(id, { label: def.label, color: glowing ? "#ffffff" : materials.legend[kindOf(def)] })
     }
     atlas.drawKeys(entries)
-  }, [atlas, layout, materials.legend, fontReady])
+  }, [atlas, layout, materials.legend, fontReady, glowing])
 
   useEffect(() => {
-    atlas.drawEngraving(config.engraving, materials.legend.alpha)
-  }, [atlas, config.engraving, materials.legend.alpha, fontReady])
+    atlas.drawEngraving(config.engraving, glowing ? "#ffffff" : materials.legend.alpha)
+  }, [atlas, config.engraving, materials.legend.alpha, fontReady, glowing])
+
+  useEffect(() => {
+    const mesh = ref.current
+    if (!mesh) return
+    mesh.layers.set(NO_SHADOW_LAYER)
+    if (glowing) return
+    const white = new THREE.Color("#ffffff")
+    for (let i = 0; i < LEGEND_COUNT; i++) mesh.setColorAt(i, white)
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+  }, [glowing])
 
   const rotations = useMemo(() => {
     const out = new Map<number, THREE.Quaternion>()
@@ -203,27 +240,47 @@ function Legends({
   const m = useMemo(() => new THREE.Matrix4(), [])
   const p = useMemo(() => new THREE.Vector3(), [])
   const s = useMemo(() => new THREE.Vector3(), [])
+  const col = useMemo(() => new THREE.Color(), [])
+  const base = useMemo(() => new THREE.Color(), [])
 
-  useFrame(() => {
+  useFrame((state) => {
     const mesh = ref.current
     if (!mesh) return
+    const time = state.clock.elapsedTime
+    base.set(config.rgbColor)
     ALL_KEY_IDS.forEach((id, i) => {
-      const state = animator.keys.get(id)!
-      const def = state.def
-      const size = LEGEND_SIZE * Math.max(1e-4, state.s)
-      p.set(state.x, KEYCAP_BASE - state.p * PRESS_DEPTH + keycapTop(def.row) + 0.0015, state.z)
+      const key = animator.keys.get(id)!
+      const def = key.def
+      const size = LEGEND_SIZE * Math.max(1e-4, key.s)
+      p.set(key.x, KEYCAP_BASE - key.p * PRESS_DEPTH + keycapTop(def.row) + 0.0015, key.z)
       s.set(size, size, 1)
       m.compose(p, rotations.get(def.row)!, s)
       mesh.setMatrixAt(i, m)
+      if (glowing) {
+        // un piso de luz para que la leyenda se lea aunque la ola esté lejos
+        ledColor(col, key, config.rgbMode, base, time).multiplyScalar(1.8).addScalar(0.12)
+        mesh.setColorAt(i, col)
+        if (id === "space") mesh.setColorAt(ALL_KEY_IDS.length, col)
+      }
       if (id === "space") {
-        const width = def.w * U * 0.84 * Math.max(1e-4, state.s)
+        const width = def.w * U * 0.84 * Math.max(1e-4, key.s)
         s.set(width, width / ENGRAVING_ASPECT, 1)
         m.compose(p, rotations.get(def.row)!, s)
         mesh.setMatrixAt(ALL_KEY_IDS.length, m)
       }
     })
     mesh.instanceMatrix.needsUpdate = true
+    if (glowing && mesh.instanceColor) mesh.instanceColor.needsUpdate = true
   })
 
-  return <instancedMesh ref={ref} args={[geometry, material, LEGEND_COUNT]} frustumCulled={false} renderOrder={2} />
+  return (
+    <Select enabled={glowing}>
+      <instancedMesh
+        ref={ref}
+        args={[geometry, glowing ? shine : printed, LEGEND_COUNT]}
+        frustumCulled={false}
+        renderOrder={2}
+      />
+    </Select>
+  )
 }

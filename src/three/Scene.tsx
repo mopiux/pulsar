@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { ContactShadows, Environment, Lightformer, PerformanceMonitor } from "@react-three/drei"
-import { Bloom, EffectComposer, ToneMapping } from "@react-three/postprocessing"
+import { EffectComposer, Selection, SelectiveBloom, ToneMapping } from "@react-three/postprocessing"
 import { ToneMappingMode } from "postprocessing"
 import * as THREE from "three"
 
@@ -12,6 +12,7 @@ import { bindInvalidate, wake } from "./activity"
 import { CameraRig, type Cover } from "./CameraRig"
 import { ACTIVE_FORWARD, LAYER_FOCUS_Y, layerOffsetY } from "./constants"
 import { Keyboard } from "./Keyboard"
+import { NO_SHADOW_LAYER } from "./SwitchLayer"
 import { LayoutAnimator } from "./layoutAnimator"
 import { QualityContext, type QualityTier } from "./quality"
 
@@ -29,6 +30,7 @@ export default function Scene({ reduced, visible, cover, onReady, fallback }: Sc
   const [animator] = useState(() => new LayoutAnimator(useConfigurator.getState().config.format))
   const pointer = useRef(new THREE.Vector2())
   const rgbOn = useConfigurator((s) => s.config.rgbMode !== "apagada")
+  const showcase = useConfigurator((s) => s.showcase)
   const mobile = useMediaQuery("(max-width: 1023px), (pointer: coarse)")
   const dark = useMediaQuery("(prefers-color-scheme: dark)")
 
@@ -37,6 +39,7 @@ export default function Scene({ reduced, visible, cover, onReady, fallback }: Sc
   const maxDpr = Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio, mobile ? 1.5 : 2)
   const [dpr, setDpr] = useState(() => Math.min(maxDpr, mobile ? 1.25 : 1.75))
   const [tier, setTier] = useState<QualityTier>(mobile ? "low" : "high")
+  const keyLight = useRef<THREE.DirectionalLight>(null)
 
   useEffect(() => {
     if (!visible) return
@@ -56,9 +59,11 @@ export default function Scene({ reduced, visible, cover, onReady, fallback }: Sc
       gl={{ antialias: !mobile, alpha: true, powerPreference: "high-performance" }}
       camera={{ fov: 32, position: [0, 3, 7], near: 0.1, far: 60 }}
       fallback={fallback}
-      onCreated={({ gl }) => {
+      onCreated={({ gl, camera }) => {
         // la transmisión de resina y policarbonato se calcula a menor resolución
         gl.transmissionResolutionScale = mobile ? 0.5 : 0.75
+        // la cámara ve también la capa que la sombra de contacto ignora
+        camera.layers.enable(NO_SHADOW_LAYER)
       }}
       aria-label="Modelo 3D del teclado. Arrastrá para rotar y usá la rueda para acercarte."
       role="img"
@@ -76,46 +81,72 @@ export default function Scene({ reduced, visible, cover, onReady, fallback }: Sc
       <QualityContext.Provider value={tier}>
         <ActivityBridge />
         <ViewShift x={(cover.right - cover.left) / 2} y={(cover.bottom - cover.top) / 2} />
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[3, 6, 4]} intensity={1.5} color="#ffffff" />
-        <directionalLight position={[-4, 3, -3]} intensity={0.45} color="#eef2ff" />
+        <StudioLights keyLight={keyLight} />
         <ActiveLayerLight reduced={reduced} />
 
+        {/* softboxes en tira: dejan reflejos largos y limpios en el aluminio */}
         <Environment resolution={tier === "high" ? 256 : 128} frames={1}>
-          <color attach="background" args={["#8e8b87"]} />
-          <Lightformer intensity={2.4} rotation-x={Math.PI / 2} position={[0, 5, -1]} scale={[10, 5, 1]} />
-          <Lightformer intensity={1.2} rotation-y={Math.PI / 2} position={[-6, 1.5, 0]} scale={[9, 3, 1]} />
-          <Lightformer intensity={1.1} rotation-y={-Math.PI / 2} position={[6, 1.5, 0]} scale={[9, 3, 1]} />
-          <Lightformer form="ring" intensity={1.5} position={[2.5, 3, 5]} scale={2.2} />
+          <color attach="background" args={["#6f6c69"]} />
+          <Lightformer intensity={1.8} rotation-x={Math.PI / 2} position={[0, 5, 0]} scale={[7, 1.4, 1]} />
+          <Lightformer intensity={2.2} rotation-y={Math.PI / 2} position={[-5, 1.8, 1]} scale={[7, 1.1, 1]} />
+          <Lightformer intensity={1.2} rotation-y={-Math.PI / 2} position={[5, 1.4, 1]} scale={[7, 0.8, 1]} />
+          <Lightformer intensity={3} position={[0, 2.2, -6]} scale={[11, 1.2, 1]} />
+          <Lightformer form="ring" intensity={1.4} position={[2.5, 3, 5]} scale={1.6} />
           <Lightformer intensity={0.5} position={[0, -2, 6]} scale={[10, 2, 1]} />
         </Environment>
 
-        <Keyboard animator={animator} reduced={reduced} pointer={pointer} />
+        <Selection>
+          <Keyboard animator={animator} reduced={reduced} pointer={pointer} />
+          {rgbOn ? (
+            <EffectComposer multisampling={tier === "high" ? 4 : 0}>
+              {/* bloom solo sobre lo marcado con <Select>: LEDs y leyendas que brillan */}
+              <SelectiveBloom
+                lights={[keyLight]}
+                mipmapBlur
+                luminanceThreshold={0.1}
+                luminanceSmoothing={0.3}
+                intensity={1.6}
+                radius={0.6}
+              />
+              <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+            </EffectComposer>
+          ) : null}
+        </Selection>
         <Ready onReady={onReady} />
 
         {/* el compositor de Bloom no respeta el degradé de alfa del piso:
             con las luces prendidas queda solo la sombra de contacto */}
-        {rgbOn ? null : <Floor dark={dark} />}
+        {rgbOn || showcase ? null : <Floor dark={dark} />}
         <ContactShadows
           position={[0, 0.004, 0.1]}
           opacity={dark ? 0.7 : 0.42}
           scale={9}
           blur={tier === "high" ? 2.6 : 2}
           far={3.6}
-          resolution={tier === "high" ? 512 : 256}
+          resolution={tier === "high" ? 1024 : 512}
           color="#1e1a16"
         />
 
         <CameraRig reduced={reduced} cover={cover} />
 
-        {rgbOn ? (
-          <EffectComposer multisampling={tier === "high" ? 4 : 0}>
-            <Bloom mipmapBlur luminanceThreshold={1.05} luminanceSmoothing={0.2} intensity={0.9} radius={0.72} />
-            <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-          </EffectComposer>
-        ) : null}
       </QualityContext.Provider>
     </Canvas>
+  )
+}
+
+/**
+ * Esquema de estudio de tres luces: principal suave desde arriba a la
+ * izquierda, relleno tenue del otro lado y contorno desde atrás para
+ * recortar la carcasa y las teclas contra el fondo.
+ */
+function StudioLights({ keyLight }: { keyLight: React.RefObject<THREE.DirectionalLight | null> }) {
+  return (
+    <>
+      <ambientLight intensity={0.16} />
+      <directionalLight ref={keyLight} position={[-3.5, 5.5, 4]} intensity={2.1} color="#fff6ec" />
+      <directionalLight position={[4.5, 2.2, 3]} intensity={0.55} color="#eef3ff" />
+      <directionalLight position={[0.5, 3.4, -5.5]} intensity={2.8} color="#ffffff" />
+    </>
   )
 }
 

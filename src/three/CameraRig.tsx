@@ -7,7 +7,9 @@ import type { FormatId } from "@/data/catalog"
 import { LAYOUTS, type Layout } from "@/data/layouts"
 import { activeStepIndex, LAYER_COUNT, STEPS, useConfigurator, type Phase, type SubId } from "@/store/configurator"
 
-import { idleFor, isAwake } from "./activity"
+import { playComplete } from "@/audio/sounds"
+
+import { idleFor, isAwake, wake } from "./activity"
 import { ACTIVE_FORWARD, CASE_WALL_TOP, KEYCAP_BASE, LAYER_FOCUS_Y, SWITCH_BASE, TILT, U, layerOffsetY } from "./constants"
 import { caseDims, keyWorldX, keyWorldZ } from "./layoutAnimator"
 
@@ -140,6 +142,25 @@ export function CameraRig({ reduced, cover }: CameraRigProps) {
   const phase = useConfigurator((s) => s.phase)
   const sub = useConfigurator((s) => s.sub[STEPS[activeStepIndex(s.placed)].id])
   const { top, bottom, left, right } = cover
+  const finishSpin = useConfigurator((s) => s.finishSpin)
+  const spin = useRef({ active: false, t: 0, start: 0 })
+
+  // giro de 360° al completar: orbita la cámara y el teclado queda quieto,
+  // así la sombra de contacto no se recalcula con el modelo girando
+  useEffect(() => {
+    if (phase !== "spinning") return
+    if (reduced) {
+      playComplete()
+      finishSpin()
+      return
+    }
+    const timer = window.setTimeout(() => {
+      spin.current = { active: true, t: 0, start: controls.current?.azimuthAngle ?? 0 }
+      playComplete()
+      wake()
+    }, 650)
+    return () => window.clearTimeout(timer)
+  }, [phase, reduced, finishSpin])
 
   useEffect(() => {
     const c = controls.current
@@ -167,7 +188,22 @@ export function CameraRig({ reduced, cover }: CameraRigProps) {
   // rotación automática lenta cuando no se toca, hasta que la escena se duerme
   useFrame((state, delta) => {
     const c = controls.current
-    if (!c || reduced || phase === "spinning" || c.active) return
+    if (!c) return
+    if (spin.current.active) {
+      const sp = spin.current
+      sp.t = Math.min(1, sp.t + Math.min(delta, 0.1) / 2.4)
+      const eased = sp.t < 0.5 ? 4 * sp.t ** 3 : 1 - Math.pow(-2 * sp.t + 2, 3) / 2
+      c.azimuthAngle = sp.start + eased * Math.PI * 2
+      if (sp.t >= 1) {
+        sp.active = false
+        // misma posición, ángulo normalizado para que la próxima transición no desande la vuelta
+        c.azimuthAngle = sp.start
+        finishSpin()
+      }
+      state.invalidate()
+      return
+    }
+    if (reduced || phase === "spinning" || c.active) return
     if (idleFor() > 5000 && isAwake()) {
       c.azimuthAngle += Math.min(delta, 0.05) * 0.07
       state.invalidate()

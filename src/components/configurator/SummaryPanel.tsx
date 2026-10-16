@@ -1,13 +1,12 @@
-import { useState } from "react"
 import { ArrowsOutLineVertical, PencilSimple, ShareNetwork } from "@phosphor-icons/react"
 import { motion, useReducedMotion } from "motion/react"
 
 import { playLift } from "@/audio/sounds"
 import { NumberTicker } from "@/components/effects/NumberTicker"
-import { OrderDialog } from "@/components/OrderDialog"
 import { Button } from "@/components/ui/button"
 import { formatDelta, formatPrice, priceLines, totalPrice } from "@/data/catalog"
 import { useShareConfig } from "@/hooks/useShareConfig"
+import { useCart } from "@/store/cart"
 import { cn } from "@/lib/utils"
 import { useConfigurator, type StepId, type SubId } from "@/store/configurator"
 
@@ -38,7 +37,7 @@ export function SummaryPanel({ className, style, compact = false }: SummaryPanel
   const explode = useConfigurator((s) => s.explode)
   const share = useShareConfig()
   const reduce = useReducedMotion()
-  const [orderOpen, setOrderOpen] = useState(false)
+  const addToCart = useCart((s) => s.add)
   const lines = priceLines(config)
 
   const edit = (label: string) => {
@@ -98,7 +97,7 @@ export function SummaryPanel({ className, style, compact = false }: SummaryPanel
           <span className="text-sm text-muted-foreground">Total</span>
           <NumberTicker value={totalPrice(config)} className="text-2xl font-semibold tracking-tight" />
         </div>
-        <Button variant="primary" size="lg" className="w-full" onClick={() => setOrderOpen(true)}>
+        <Button variant="primary" size="lg" className="w-full" onClick={() => addToCart(config)}>
           Encargar
         </Button>
         <div className="mt-2 grid grid-cols-2 gap-2">
@@ -119,7 +118,6 @@ export function SummaryPanel({ className, style, compact = false }: SummaryPanel
           </Button>
         </div>
       </div>
-      <OrderDialog open={orderOpen} onOpenChange={setOrderOpen} />
     </motion.aside>
   )
 }

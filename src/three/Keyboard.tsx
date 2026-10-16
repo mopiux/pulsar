@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber"
 import { RoundedBox } from "@react-three/drei"
 import * as THREE from "three"
 
-import { playComplete, playSnap } from "@/audio/sounds"
+import { playSnap } from "@/audio/sounds"
 import { knobColor, type Config } from "@/data/catalog"
 import { DEMO_KEY_ID, LAYOUTS } from "@/data/layouts"
 import { LAYER_COUNT, useConfigurator } from "@/store/configurator"
@@ -16,7 +16,7 @@ import { KeycapLayer } from "./KeycapLayer"
 import { LEGEND_FONT } from "./legendAtlas"
 import { caseDims, type LayoutAnimator } from "./layoutAnimator"
 import { useCableMaterial, useCaseMaterial, useKnobMaterial, usePlateMaterial } from "./materials"
-import { SwitchLayer } from "./SwitchLayer"
+import { NO_SHADOW_LAYER, SwitchLayer } from "./SwitchLayer"
 
 interface LayerSpring {
   y: number
@@ -48,11 +48,10 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
   const config = useConfigurator((s) => s.config)
   const placed = useConfigurator((s) => s.placed)
   const phase = useConfigurator((s) => s.phase)
-  const finishSpin = useConfigurator((s) => s.finishSpin)
+  const showcase = useConfigurator((s) => s.showcase)
   const demoPress = useConfigurator((s) => s.demoPress)
 
   const rootRef = useRef<THREE.Group>(null)
-  const spinRef = useRef<THREE.Group>(null)
   const pivotRef = useRef<THREE.Group>(null)
   const innerRef = useRef<THREE.Group>(null)
   const layerRefs = useRef<(THREE.Group | null)[]>([])
@@ -68,7 +67,6 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
     }))
   )
   const prevPlaced = useRef(placed)
-  const spin = useRef({ active: false, t: 0 })
 
   useEffect(() => {
     animator.setFormat(config.format)
@@ -85,21 +83,6 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
     }
     prevPlaced.current = placed
   }, [placed, reduced])
-
-  // giro de 360° al completar
-  useEffect(() => {
-    if (phase !== "spinning") return
-    if (reduced) {
-      playComplete()
-      finishSpin()
-      return
-    }
-    const timer = window.setTimeout(() => {
-      spin.current = { active: true, t: 0 }
-      playComplete()
-    }, 520)
-    return () => window.clearTimeout(timer)
-  }, [phase, reduced, finishSpin])
 
   // tecla de prueba al elegir un switch
   useEffect(() => {
@@ -133,29 +116,14 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
     // inclinación que sigue al mouse
     if (rootRef.current) {
       const p = pointer.current
-      const follow = reduced || spin.current.active ? 0 : 1
+      // durante el giro final la cámara orbita; el teclado se queda quieto
+      const follow = reduced || phase === "spinning" ? 0 : 1
       const rx = p ? p.y * -0.07 * follow : 0
       const ry = p ? p.x * 0.16 * follow : 0
       const r = rootRef.current.rotation
       r.x = THREE.MathUtils.damp(r.x, rx, 3, dt)
       r.y = THREE.MathUtils.damp(r.y, ry, 3, dt)
       if (Math.abs(r.x - rx) > 1e-4 || Math.abs(r.y - ry) > 1e-4) moving = true
-    }
-
-    // giro final
-    if (spinRef.current) {
-      if (spin.current.active) {
-        moving = true
-        spin.current.t += Math.min(delta, 0.1) / 2.1
-        const t = Math.min(spin.current.t, 1)
-        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
-        spinRef.current.rotation.y = eased * Math.PI * 2
-        if (t >= 1) {
-          spin.current.active = false
-          spinRef.current.rotation.y = 0
-          finishSpin()
-        }
-      }
     }
 
     // capas: resorte con rebote hacia su altura objetivo
@@ -200,6 +168,8 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
 
       const bobY = Math.sin(time * 1.15 + i * 1.4) * 0.03 * sp.bob
       group.position.set(0, sp.y + bobY, sp.z)
+      // en vitrina solo se ven las capas ya encastradas
+      group.visible = !showcase || i < placed
       group.rotation.z = Math.sin(time * 0.8 + i * 2.1) * 0.012 * sp.bob
       group.rotation.x = Math.cos(time * 0.7 + i * 1.7) * 0.01 * sp.bob
       group.scale.setScalar(sp.s)
@@ -212,7 +182,7 @@ export function Keyboard({ animator, reduced, pointer }: KeyboardProps) {
 
   return (
     <group ref={rootRef}>
-      <group ref={spinRef}>
+      <group>
         <group ref={pivotRef} rotation={[TILT, 0, 0]}>
           <group ref={innerRef}>
             <group ref={(el) => void (layerRefs.current[0] = el)} name="capa-carcasa">
@@ -395,6 +365,12 @@ function CableDetail({ config, animator }: { config: Config; animator: LayoutAni
     return { geometry: geo, connector: { point, quat } }
   }, [])
   useEffect(() => () => geometry.dispose(), [geometry])
+
+  // el espiral del cable no proyecta sombra en el piso: sus vueltas
+  // dibujaban un rayado que giraba con el teclado
+  useEffect(() => {
+    ref.current?.traverse((o) => o.layers.set(NO_SHADOW_LAYER))
+  }, [])
 
   useFrame(() => {
     const g = ref.current
